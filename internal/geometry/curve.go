@@ -52,7 +52,7 @@ func CurvesFromDXF(lines []*entity.Line, arcs []*entity.Arc) []Path {
 				X: math.Cos(dxfArc.Angle[1]*math.Pi/180)*dxfArc.Radius + dxfArc.Center[0],
 				Y: math.Sin(dxfArc.Angle[1]*math.Pi/180)*dxfArc.Radius + dxfArc.Center[1],
 			},
-			Clockwise: dxfArc.Angle[0] <= dxfArc.Angle[1],
+			Clockwise: math.Mod((dxfArc.Angle[1]+360.0-dxfArc.Angle[0]), 360.0) > 0,
 			Radius:    dxfArc.Radius,
 		}
 	}

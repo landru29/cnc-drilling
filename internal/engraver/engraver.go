@@ -42,7 +42,15 @@ func Process(in io.Reader, out io.Writer, speedMillimeterPerMinute float64, dril
 	for idx, path := range geometry.CurvesFromDXF(lines, arcs) {
 		// Start of path
 		start := path.Start()
-		if _, err := fmt.Fprintf(out, "; path #%d\nG0 X%.01f Y%.01f\nG1 Z%.01f F%.01f \n", idx, start.X, start.Y, drillingDeep, speedMillimeterPerMinute); err != nil {
+		if _, err := fmt.Fprintf(
+			out,
+			"; path #%d\nG0 X%.01f Y%.01f\nG1 Z%.01f F%.01f \n",
+			idx,
+			start.X,
+			start.Y,
+			-drillingDeep,
+			speedMillimeterPerMinute,
+		); err != nil {
 			return err
 		}
 
@@ -52,12 +60,21 @@ func Process(in io.Reader, out io.Writer, speedMillimeterPerMinute float64, dril
 					return err
 				}
 			} else {
-				code := 3
+				code := 2
 				if segment.Clockwise {
-					code = 2
+					code = 3
 				}
 
-				if _, err := fmt.Fprintf(out, "G%d X%.01f Y%.01f I%.01f J%.01f F%.01f\n", code, segment.End.X, segment.End.Y, segment.Center.X, segment.Start.Y, speedMillimeterPerMinute); err != nil {
+				if _, err := fmt.Fprintf(
+					out,
+					"G%d X%.01f Y%.01f I%.01f J%.01f F%.01f\n",
+					code,
+					segment.End.X,
+					segment.End.Y,
+					segment.Center.X-segment.Start.X,
+					segment.Center.Y-segment.Start.Y,
+					speedMillimeterPerMinute,
+				); err != nil {
 					return err
 				}
 			}
