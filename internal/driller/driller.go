@@ -31,7 +31,7 @@ func Process(in io.Reader, out io.Writer, speedMillimeterPerMinute float64, dril
 		}
 	}
 
-	for idx, point := range geometry.FromDXF(setOfPoints) {
+	for idx, point := range geometry.PointsFromDXFPoints(setOfPoints) {
 		if _, err := fmt.Fprintf(
 			out,
 			";--- Drilling #%d ---\nG0 X%.01F Y%.01f\nG1 Z%.01f F%.01f\nG0 Z%.01f\n",

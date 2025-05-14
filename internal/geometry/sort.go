@@ -18,7 +18,7 @@ func (p pointsPtr) Len() int {
 }
 
 func (p pointsPtr) Less(i, j int) bool {
-	return p.reference.Weight(p.data[i]) < p.reference.Weight(p.data[j])
+	return p.reference.Weight(p.data[i].Coordinates) < p.reference.Weight(p.data[j].Coordinates)
 }
 
 func (p pointsPtr) Swap(i, j int) {
