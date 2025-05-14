@@ -19,7 +19,7 @@ func Process(in io.Reader, out io.Writer, speedMillimeterPerMinute float64, dril
 		_ = closer.Close()
 	}(drawing)
 
-	if _, err := fmt.Fprintf(out, "G90\nG0 Z%.01f\n", securityZ); err != nil {
+	if _, err := fmt.Fprintf(out, "G90\nG21\nG0 Z%.01f\n", securityZ); err != nil {
 		return err
 	}
 

@@ -44,7 +44,11 @@ func mainCommand() *cobra.Command {
 }
 
 func header(writer io.Writer, filename string) error {
-	if _, err := fmt.Fprintf(writer, "; File: %s\n", filepath.Base(filename)); err != nil {
+	if _, err := fmt.Fprintf(
+		writer,
+		"; File: %s\n",
+		filepath.Base(filename),
+	); err != nil {
 		return err
 	}
 
