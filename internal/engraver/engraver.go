@@ -52,9 +52,9 @@ func Process(in io.Reader, out io.Writer, speedMillimeterPerMinute float64, dril
 					return err
 				}
 			} else {
-				code := 2
-				if segment.CounterClockwise {
-					code = 3
+				code := 3
+				if segment.Clockwise {
+					code = 2
 				}
 
 				if _, err := fmt.Fprintf(out, "G%d X%.01f Y%.01f I%.01f J%.01f F%.01f\n", code, segment.End.X, segment.End.Y, segment.Center.X, segment.Start.Y, speedMillimeterPerMinute); err != nil {

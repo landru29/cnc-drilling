@@ -8,12 +8,12 @@ import (
 )
 
 type Curve struct {
-	Name             string
-	Start            Coordinates
-	End              Coordinates
-	Center           Coordinates
-	Radius           float64
-	CounterClockwise bool
+	Name      string
+	Start     Coordinates
+	End       Coordinates
+	Center    Coordinates
+	Radius    float64
+	Clockwise bool
 
 	processed bool
 }
@@ -52,8 +52,8 @@ func CurvesFromDXF(lines []*entity.Line, arcs []*entity.Arc) []Path {
 				X: math.Cos(dxfArc.Angle[1]*math.Pi/180)*dxfArc.Radius + dxfArc.Center[0],
 				Y: math.Sin(dxfArc.Angle[1]*math.Pi/180)*dxfArc.Radius + dxfArc.Center[1],
 			},
-			CounterClockwise: dxfArc.Angle[0] <= dxfArc.Angle[1],
-			Radius:           dxfArc.Radius,
+			Clockwise: dxfArc.Angle[0] <= dxfArc.Angle[1],
+			Radius:    dxfArc.Radius,
 		}
 	}
 
@@ -92,7 +92,7 @@ func (p *Path) next(data []Curve) bool {
 		if end.Equal(data[idx].End) {
 			data[idx].processed = true
 			data[idx].Start, data[idx].End = data[idx].End, data[idx].Start
-			data[idx].CounterClockwise = !data[idx].CounterClockwise
+			data[idx].Clockwise = !data[idx].Clockwise
 			*p = append(*p, data[idx])
 			return true
 		}
@@ -113,7 +113,7 @@ func (p *Path) next(data []Curve) bool {
 		if end.Equal(data[idx].Start) {
 			data[idx].processed = true
 			data[idx].Start, data[idx].End = data[idx].End, data[idx].Start
-			data[idx].CounterClockwise = !data[idx].CounterClockwise
+			data[idx].Clockwise = !data[idx].Clockwise
 			*p = append(Path{data[idx]}, *p...)
 			return true
 		}
