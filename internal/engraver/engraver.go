@@ -9,9 +9,6 @@ import (
 	"github.com/yofu/dxf/entity"
 )
 
-type curve struct {
-}
-
 func Process(in io.Reader, out io.Writer, speedMillimeterPerMinute float64, drillingDeep float64, securityZ float64) error {
 	drawing, err := dxf.FromReader(in)
 	if err != nil {
