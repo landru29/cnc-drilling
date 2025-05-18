@@ -46,7 +46,7 @@ func engraveCommand(files *[]string, speedMillimeterPerMinute *float64, security
 		},
 	}
 
-	output.Flags().Float64VarP(&drillingDeep, "deep", "d", 5, "drilling deep in millimeters")
+	output.Flags().Float64VarP(&drillingDeep, "deep", "d", 1, "drilling deep in millimeters")
 
 	return output
 }

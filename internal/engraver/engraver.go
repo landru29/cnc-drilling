@@ -58,5 +58,9 @@ func Process(in io.Reader, out io.Writer, speedMillimeterPerMinute float64, dril
 		}
 	}
 
+	if _, err := fmt.Fprintf(out, "G0 X0 Y0\n"); err != nil {
+		return err
+	}
+
 	return nil
 }
