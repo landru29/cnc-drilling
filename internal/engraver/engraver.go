@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/landru29/cnc-drilling/internal/gcode"
 	"github.com/landru29/cnc-drilling/internal/geometry"
 	"github.com/yofu/dxf"
 	"github.com/yofu/dxf/entity"
@@ -36,49 +37,23 @@ func Process(in io.Reader, out io.Writer, speedMillimeterPerMinute float64, dril
 		}
 	}
 
-	for idx, path := range geometry.CurvesFromDXF(lines, arcs) {
-		// Start of path
-		start := path.Start()
-		if _, err := fmt.Fprintf(
-			out,
-			"; path #%d\nG0 X%.01f Y%.01f\nG1 Z%.01f F%.01f \n",
-			idx,
-			start.X,
-			start.Y,
-			-drillingDeep,
-			speedMillimeterPerMinute,
-		); err != nil {
+	for idx, path := range geometry.CurvesFromDXF(geometry.WithDXFLines(lines...), geometry.WithDXFArcs(arcs...)) {
+		code, err := gcode.Marshal(
+			path,
+			gcode.WithDeep(drillingDeep),
+			gcode.WithFeed(speedMillimeterPerMinute),
+			gcode.WithSecurityZ(securityZ),
+		)
+		if err != nil {
 			return err
 		}
 
-		for _, segment := range path {
-			if segment.Radius == 0 {
-				if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", segment.End.X, segment.End.Y, speedMillimeterPerMinute); err != nil {
-					return err
-				}
-			} else {
-				code := 2
-				if segment.Clockwise {
-					code = 3
-				}
-
-				if _, err := fmt.Fprintf(
-					out,
-					"G%d X%.01f Y%.01f I%.01f J%.01f F%.01f\n",
-					code,
-					segment.End.X,
-					segment.End.Y,
-					segment.Center.X-segment.Start.X,
-					segment.Center.Y-segment.Start.Y,
-					speedMillimeterPerMinute,
-				); err != nil {
-					return err
-				}
-			}
-		}
-
-		// End of path
-		if _, err := fmt.Fprintf(out, "G0 Z%.01f\n", securityZ); err != nil {
+		if _, err := fmt.Fprintf(
+			out,
+			";--- Path #%d ---\n%s",
+			idx,
+			string(code),
+		); err != nil {
 			return err
 		}
 	}

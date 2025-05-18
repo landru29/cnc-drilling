@@ -17,6 +17,7 @@ func engraveCommand(files *[]string, speedMillimeterPerMinute *float64, security
 	output := &cobra.Command{
 		Use:   "engrave <filename.dxf>",
 		Short: "Generate gcode to engrave from dxf",
+		Args:  cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			for _, file := range *files {
 				fileDesc, err := os.Open(file)

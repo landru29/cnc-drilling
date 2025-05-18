@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/landru29/cnc-drilling/internal/gcode"
 	"github.com/landru29/cnc-drilling/internal/geometry"
 	"github.com/yofu/dxf"
 	"github.com/yofu/dxf/entity"
@@ -31,15 +32,22 @@ func Process(in io.Reader, out io.Writer, speedMillimeterPerMinute float64, dril
 		}
 	}
 
-	for idx, point := range geometry.PointsFromDXFPoints(setOfPoints) {
+	for idx, point := range geometry.PointsFromDXFPoints(geometry.WithDXFPoints(setOfPoints...)) {
+		code, err := gcode.Marshal(
+			point,
+			gcode.WithDeep(drillingDeep),
+			gcode.WithFeed(speedMillimeterPerMinute),
+			gcode.WithSecurityZ(securityZ),
+		)
+		if err != nil {
+			return err
+		}
+
 		if _, err := fmt.Fprintf(
 			out,
-			";--- Drilling #%d ---\nG0 X%.01F Y%.01f\nG1 Z%.01f F%.01f\nG0 Z%.01f\n",
+			";--- Drilling #%d ---\n%s",
 			idx,
-			point.X, point.Y,
-			-drillingDeep,
-			speedMillimeterPerMinute,
-			securityZ,
+			string(code),
 		); err != nil {
 			return err
 		}

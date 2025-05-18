@@ -17,6 +17,7 @@ func drillCommand(files *[]string, speedMillimeterPerMinute *float64, securityZ 
 	output := &cobra.Command{
 		Use:   "drill <filename.dxf>",
 		Short: "Generate gcode to drill from dxf",
+		Args:  cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			for _, file := range *files {
 				fileDesc, err := os.Open(file)

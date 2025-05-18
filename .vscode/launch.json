@@ -16,7 +16,7 @@
             ]
         },
         {
-            "name": "Engrave",
+            "name": "Engrave rectangle",
             "type": "go",
             "request": "launch",
             "mode": "auto",
@@ -24,6 +24,17 @@
             "args": [
                 "engrave",
                 "../testdata/rectangle.dxf"
+            ]
+        },
+        {
+            "name": "Engrave 2 blocs",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd",
+            "args": [
+                "engrave",
+                "../testdata/point01.dxf"
             ]
         }
     ]
