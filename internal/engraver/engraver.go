@@ -37,7 +37,7 @@ func Process(in io.Reader, out io.Writer, speedMillimeterPerMinute float64, dril
 		}
 	}
 
-	for idx, path := range geometry.CurvesFromDXF(geometry.WithDXFLines(lines...), geometry.WithDXFArcs(arcs...)) {
+	for idx, path := range geometry.PathsFromDXF(geometry.WithDXFLines(lines...), geometry.WithDXFArcs(arcs...)) {
 		code, err := gcode.Marshal(
 			path,
 			gcode.WithDeep(drillingDeep),
