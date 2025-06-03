@@ -5,6 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Info",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd",
+            "args": [
+                "info",
+                "../testdata/point01.dxf"
+            ]
+        },
+        {
             "name": "Drill",
             "type": "go",
             "request": "launch",

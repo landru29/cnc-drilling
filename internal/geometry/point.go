@@ -26,11 +26,11 @@ func (p Point) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 	)), nil
 }
 
-func PointsFromDXFPoints(entities ...dxfConfigurator) []Point {
+func PointsFromDXFPoints(configs ...dxfConfigurator) []Point {
 	dxfFile := dxf{}
 
-	for _, entitie := range entities {
-		entitie(&dxfFile)
+	for _, config := range configs {
+		config(&dxfFile)
 	}
 
 	inputPoints := make([]Linker, len(dxfFile.points))

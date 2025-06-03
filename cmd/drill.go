@@ -6,14 +6,11 @@ import (
 	"os"
 
 	"github.com/landru29/cnc-drilling/internal/driller"
+	"github.com/landru29/cnc-drilling/internal/information"
 	"github.com/spf13/cobra"
 )
 
-func drillCommand(files *[]string, speedMillimeterPerMinute *float64, securityZ *float64) *cobra.Command {
-	var (
-		drillingDeep float64
-	)
-
+func drillCommand(files *[]string, config *information.Config) *cobra.Command {
 	output := &cobra.Command{
 		Use:   "drill <filename.dxf>",
 		Short: "Generate gcode to drill from dxf",
@@ -33,7 +30,11 @@ func drillCommand(files *[]string, speedMillimeterPerMinute *float64, securityZ 
 					return err
 				}
 
-				if err := driller.Process(fileDesc, cmd.OutOrStdout(), *speedMillimeterPerMinute, drillingDeep, *securityZ); err != nil {
+				if err := driller.Process(
+					fileDesc,
+					cmd.OutOrStdout(),
+					*config,
+				); err != nil {
 					return err
 				}
 
@@ -46,7 +47,7 @@ func drillCommand(files *[]string, speedMillimeterPerMinute *float64, securityZ 
 		},
 	}
 
-	output.Flags().Float64VarP(&drillingDeep, "deep", "d", 5, "drilling deep in millimeters")
+	output.Flags().Float64VarP(&config.Deepness, "deep", "d", 5, "drilling deep in millimeters")
 
 	return output
 }

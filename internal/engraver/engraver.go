@@ -3,14 +3,16 @@ package engraver
 import (
 	"fmt"
 	"io"
+	"slices"
 
 	"github.com/landru29/cnc-drilling/internal/gcode"
 	"github.com/landru29/cnc-drilling/internal/geometry"
+	"github.com/landru29/cnc-drilling/internal/information"
 	"github.com/yofu/dxf"
 	"github.com/yofu/dxf/entity"
 )
 
-func Process(in io.Reader, out io.Writer, speedMillimeterPerMinute float64, drillingDeep float64, securityZ float64) error {
+func Process(in io.Reader, out io.Writer, config information.Config) error {
 	drawing, err := dxf.FromReader(in)
 	if err != nil {
 		return err
@@ -20,7 +22,7 @@ func Process(in io.Reader, out io.Writer, speedMillimeterPerMinute float64, dril
 		_ = closer.Close()
 	}(drawing)
 
-	if _, err := fmt.Fprintf(out, "G90\nG21\nG0 Z%.01f\n", securityZ); err != nil {
+	if _, err := fmt.Fprintf(out, "G90\nG21\nG0 Z%.01f\n", config.SecurityZ); err != nil {
 		return err
 	}
 
@@ -28,6 +30,10 @@ func Process(in io.Reader, out io.Writer, speedMillimeterPerMinute float64, dril
 	lines := []*entity.Line{}
 
 	for _, geometry := range drawing.Entities() {
+		if len(config.Layer) > 0 && !slices.Contains(config.Layer, geometry.Layer().Name()) {
+			continue
+		}
+
 		if arc, ok := geometry.(*entity.Arc); ok {
 			arcs = append(arcs, arc)
 		}
@@ -40,9 +46,9 @@ func Process(in io.Reader, out io.Writer, speedMillimeterPerMinute float64, dril
 	for idx, path := range geometry.PathsFromDXF(geometry.WithDXFLines(lines...), geometry.WithDXFArcs(arcs...)) {
 		code, err := gcode.Marshal(
 			path,
-			gcode.WithDeep(drillingDeep),
-			gcode.WithFeed(speedMillimeterPerMinute),
-			gcode.WithSecurityZ(securityZ),
+			gcode.WithDeep(config.Deepness),
+			gcode.WithFeed(config.SpeedMillimeterPerMinute),
+			gcode.WithSecurityZ(config.SecurityZ),
 		)
 		if err != nil {
 			return err

@@ -6,14 +6,11 @@ import (
 	"os"
 
 	"github.com/landru29/cnc-drilling/internal/engraver"
+	"github.com/landru29/cnc-drilling/internal/information"
 	"github.com/spf13/cobra"
 )
 
-func engraveCommand(files *[]string, speedMillimeterPerMinute *float64, securityZ *float64) *cobra.Command {
-	var (
-		drillingDeep float64
-	)
-
+func engraveCommand(files *[]string, config *information.Config) *cobra.Command {
 	output := &cobra.Command{
 		Use:   "engrave <filename.dxf>",
 		Short: "Generate gcode to engrave from dxf",
@@ -33,7 +30,10 @@ func engraveCommand(files *[]string, speedMillimeterPerMinute *float64, security
 					return err
 				}
 
-				if err := engraver.Process(fileDesc, cmd.OutOrStdout(), *speedMillimeterPerMinute, drillingDeep, *securityZ); err != nil {
+				if err := engraver.Process(
+					fileDesc, cmd.OutOrStdout(),
+					*config,
+				); err != nil {
 					return err
 				}
 
@@ -46,7 +46,7 @@ func engraveCommand(files *[]string, speedMillimeterPerMinute *float64, security
 		},
 	}
 
-	output.Flags().Float64VarP(&drillingDeep, "deep", "d", 1, "drilling deep in millimeters")
+	output.Flags().Float64VarP(&config.Deepness, "deep", "d", 1, "drilling deep in millimeters")
 
 	return output
 }
