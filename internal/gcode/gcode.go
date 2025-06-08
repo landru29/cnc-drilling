@@ -12,9 +12,10 @@ type Marshaler interface {
 type Configurator func(*Options)
 
 type Options struct {
-	Deep      float64
-	Feed      float64
-	SecurityZ float64
+	Deep        float64
+	Feed        float64
+	SecurityZ   float64
+	IgnoreStart bool
 }
 
 func WithDeep(deep float64) Configurator {
@@ -32,6 +33,12 @@ func WithFeed(feed float64) Configurator {
 func WithSecurityZ(securityZ float64) Configurator {
 	return func(o *Options) {
 		o.SecurityZ = securityZ
+	}
+}
+
+func WithoutStart() Configurator {
+	return func(o *Options) {
+		o.IgnoreStart = true
 	}
 }
 

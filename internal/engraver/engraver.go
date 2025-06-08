@@ -28,6 +28,8 @@ func Process(in io.Reader, out io.Writer, config information.Config) error {
 
 	arcs := []*entity.Arc{}
 	lines := []*entity.Line{}
+	lightPolylines := []*entity.LwPolyline{}
+	polylines := []*entity.Polyline{}
 
 	for _, geometry := range drawing.Entities() {
 		if len(config.Layer) > 0 && !slices.Contains(config.Layer, geometry.Layer().Name()) {
@@ -41,9 +43,22 @@ func Process(in io.Reader, out io.Writer, config information.Config) error {
 		if line, ok := geometry.(*entity.Line); ok {
 			lines = append(lines, line)
 		}
+
+		if lightPolyline, ok := geometry.(*entity.LwPolyline); ok {
+			lightPolylines = append(lightPolylines, lightPolyline)
+		}
+
+		if polyline, ok := geometry.(*entity.Polyline); ok {
+			polylines = append(polylines, polyline)
+		}
 	}
 
-	for idx, path := range geometry.PathsFromDXF(geometry.WithDXFLines(lines...), geometry.WithDXFArcs(arcs...)) {
+	for idx, path := range geometry.PathsFromDXF(
+		geometry.WithDXFLines(lines...),
+		geometry.WithDXFArcs(arcs...),
+		geometry.WithDXFLwPolyline(lightPolylines...),
+		geometry.WithDXFPolyline(polylines...),
+	) {
 		code, err := gcode.Marshal(
 			path,
 			gcode.WithDeep(config.Deepness),

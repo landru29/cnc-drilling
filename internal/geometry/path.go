@@ -10,22 +10,28 @@ type Path []Linker
 
 // MarshallGCode implements the Marshaler interface.
 func (p Path) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
+	var output string
+
 	options := gcode.Options{}
 	for _, config := range configs {
 		config(&options)
 	}
 
-	start := p.Start()
-	output := fmt.Sprintf(
-		"G0 X%.01f Y%.01f\nG1 Z%.01f F%.01f \n",
-		start.X,
-		start.Y,
-		-options.Deep,
-		options.Feed,
-	)
+	if !options.IgnoreStart {
+		start := p.Start()
+		output = fmt.Sprintf(
+			"G0 X%.01f Y%.01f\nG1 Z%.01f F%.01f \n",
+			start.X,
+			start.Y,
+			-options.Deep,
+			options.Feed,
+		)
+	}
 
 	for _, segment := range p {
-		out, err := gcode.Marshal(segment, configs...)
+		localConf := append([]gcode.Configurator{gcode.WithoutStart()}, configs...)
+
+		out, err := gcode.Marshal(segment, localConf...)
 		if err != nil {
 			return nil, err
 		}

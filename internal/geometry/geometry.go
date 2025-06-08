@@ -54,7 +54,7 @@ func PathsFromDXF(entities ...dxfConfigurator) []Path {
 		entitie(&dxfFile)
 	}
 
-	output := make([]Linker, len(dxfFile.lines)+len(dxfFile.arcs)+len(dxfFile.polyline))
+	output := make([]Linker, len(dxfFile.lines)+len(dxfFile.arcs)+len(dxfFile.polyline)+len(dxfFile.lwPolyline))
 
 	for idx, dxfLine := range dxfFile.lines {
 		output[idx] = &Segment{

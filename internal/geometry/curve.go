@@ -38,9 +38,22 @@ func (c Curve) Weight(other Linker) [2]float64 {
 
 // MarshallGCode implements the Marshaler interface.
 func (c Curve) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
+	var output string
+
 	options := gcode.Options{}
 	for _, config := range configs {
 		config(&options)
+	}
+
+	if !options.IgnoreStart {
+		start := c.Start()
+		output = fmt.Sprintf(
+			"G0 X%.01f Y%.01f\nG1 Z%.01f F%.01f \n",
+			start.X,
+			start.Y,
+			-options.Deep,
+			options.Feed,
+		)
 	}
 
 	code := 2
@@ -48,7 +61,7 @@ func (c Curve) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 		code = 3
 	}
 
-	return []byte(fmt.Sprintf(
+	output += fmt.Sprintf(
 		"G%d X%.01f Y%.01f I%.01f J%.01f F%.01f\n",
 		code,
 		c.EndPoint.X,
@@ -56,5 +69,7 @@ func (c Curve) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 		c.Center.X-c.StartPoint.X,
 		c.Center.Y-c.StartPoint.Y,
 		options.Feed,
-	)), nil
+	)
+
+	return []byte(output), nil
 }

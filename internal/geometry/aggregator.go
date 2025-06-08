@@ -43,9 +43,11 @@ func nextEntity(entities []Linker, from Linker, filter func(from Linker, to Link
 		reference: from,
 	}
 
-	for idx, entity := range entities {
-		sorter.data[idx] = entity
-	}
+	copy(sorter.data, entities)
+
+	// for idx, entity := range entities {
+	// 	sorter.data[idx] = entity
+	// }
 
 	sort.Sort(&sorter)
 
@@ -70,9 +72,12 @@ func SortEntities(entities []Linker, from *Coordinates, filter func(from Linker,
 	)
 
 	linkers := make([]Linker, len(entities))
-	for idx, entity := range entities {
-		linkers[idx] = entity
-	}
+
+	copy(linkers, entities)
+
+	// for idx, entity := range entities {
+	// 	linkers[idx] = entity
+	// }
 
 	if from != nil {
 		end = from

@@ -30,15 +30,30 @@ func (s Segment) Weight(other Linker) [2]float64 {
 
 // MarshallGCode implements the Marshaler interface.
 func (s Segment) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
+	var output string
+
 	options := gcode.Options{}
 	for _, config := range configs {
 		config(&options)
 	}
 
-	return []byte(fmt.Sprintf(
+	if !options.IgnoreStart {
+		start := s.Start()
+		output = fmt.Sprintf(
+			"G0 X%.01f Y%.01f\nG1 Z%.01f F%.01f \n",
+			start.X,
+			start.Y,
+			-options.Deep,
+			options.Feed,
+		)
+	}
+
+	output += fmt.Sprintf(
 		"G1 X%.01f Y%.01f F%.01f\n",
 		s.EndPoint.X,
 		s.EndPoint.Y,
 		options.Feed,
-	)), nil
+	)
+
+	return []byte(output), nil
 }
