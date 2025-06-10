@@ -75,10 +75,6 @@ func SortEntities(entities []Linker, from *Coordinates, filter func(from Linker,
 
 	copy(linkers, entities)
 
-	// for idx, entity := range entities {
-	// 	linkers[idx] = entity
-	// }
-
 	if from != nil {
 		end = from
 		start = from

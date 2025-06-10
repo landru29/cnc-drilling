@@ -16,6 +16,7 @@ type Options struct {
 	Feed        float64
 	SecurityZ   float64
 	IgnoreStart bool
+	IgnoreEnd   bool
 }
 
 func WithDeep(deep float64) Configurator {
@@ -39,6 +40,12 @@ func WithSecurityZ(securityZ float64) Configurator {
 func WithoutStart() Configurator {
 	return func(o *Options) {
 		o.IgnoreStart = true
+	}
+}
+
+func WithoutEnd() Configurator {
+	return func(o *Options) {
+		o.IgnoreEnd = true
 	}
 }
 

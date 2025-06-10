@@ -10,6 +10,7 @@ import (
 type dxf struct {
 	points     []*entity.Point
 	arcs       []*entity.Arc
+	circles    []*entity.Circle
 	lines      []*entity.Line
 	polyline   []*entity.Polyline
 	lwPolyline []*entity.LwPolyline
@@ -26,6 +27,12 @@ func WithDXFPoints(data ...*entity.Point) dxfConfigurator {
 func WithDXFArcs(data ...*entity.Arc) dxfConfigurator {
 	return func(d *dxf) {
 		d.arcs = append(d.arcs, data...)
+	}
+}
+
+func WithDXFCircle(data ...*entity.Circle) dxfConfigurator {
+	return func(d *dxf) {
+		d.circles = append(d.circles, data...)
 	}
 }
 
@@ -54,11 +61,11 @@ func PathsFromDXF(entities ...dxfConfigurator) []Path {
 		entitie(&dxfFile)
 	}
 
-	output := make([]Linker, len(dxfFile.lines)+len(dxfFile.arcs)+len(dxfFile.polyline)+len(dxfFile.lwPolyline))
+	output := []Linker{}
 
-	for idx, dxfLine := range dxfFile.lines {
-		output[idx] = &Segment{
-			Name: fmt.Sprintf("#%d", idx),
+	for _, dxfLine := range dxfFile.lines {
+		output = append(output, &Segment{
+			Name: fmt.Sprintf("#%d", len(output)),
 			StartPoint: Coordinates{
 				X: dxfLine.Start[0],
 				Y: dxfLine.Start[1],
@@ -67,12 +74,12 @@ func PathsFromDXF(entities ...dxfConfigurator) []Path {
 				X: dxfLine.End[0],
 				Y: dxfLine.End[1],
 			},
-		}
+		})
 	}
 
-	for idx, dxfArc := range dxfFile.arcs {
-		output[idx+len(dxfFile.lines)] = &Curve{
-			Name: fmt.Sprintf("#%d", idx+len(dxfFile.lines)),
+	for _, dxfArc := range dxfFile.arcs {
+		output = append(output, &Curve{
+			Name: fmt.Sprintf("#%d", len(output)),
 			Center: Coordinates{
 				X: dxfArc.Center[0],
 				Y: dxfArc.Center[1],
@@ -87,15 +94,52 @@ func PathsFromDXF(entities ...dxfConfigurator) []Path {
 			},
 			Clockwise: math.Mod((dxfArc.Angle[1]+360.0-dxfArc.Angle[0]), 360.0) > 0,
 			Radius:    dxfArc.Radius,
-		}
+		})
 	}
 
-	for idx, dxfPoly := range dxfFile.polyline {
-		output[idx+len(dxfFile.lines)+len(dxfFile.arcs)] = newPolyline(dxfPoly, fmt.Sprintf("#%d", idx))
+	for _, dxfCircle := range dxfFile.circles {
+		output = append(output, &Path{
+			&Curve{
+				Name: fmt.Sprintf("#%d (1/2)", len(output)),
+				Center: Coordinates{
+					X: dxfCircle.Center[0],
+					Y: dxfCircle.Center[1],
+				},
+				Radius: dxfCircle.Radius,
+				StartPoint: Coordinates{
+					X: dxfCircle.Center[0] + dxfCircle.Radius,
+					Y: dxfCircle.Center[1],
+				},
+				EndPoint: Coordinates{
+					X: dxfCircle.Center[0] - dxfCircle.Radius,
+					Y: dxfCircle.Center[1],
+				},
+			},
+			&Curve{
+				Name: fmt.Sprintf("#%d (2/2)", len(output)),
+				Center: Coordinates{
+					X: dxfCircle.Center[0],
+					Y: dxfCircle.Center[1],
+				},
+				Radius: dxfCircle.Radius,
+				StartPoint: Coordinates{
+					X: dxfCircle.Center[0] - dxfCircle.Radius,
+					Y: dxfCircle.Center[1],
+				},
+				EndPoint: Coordinates{
+					X: dxfCircle.Center[0] + dxfCircle.Radius,
+					Y: dxfCircle.Center[1],
+				},
+			},
+		})
 	}
 
-	for idx, dxfPoly := range dxfFile.lwPolyline {
-		output[idx+len(dxfFile.lines)+len(dxfFile.arcs)+len(dxfFile.polyline)] = newLightPolyline(dxfPoly, fmt.Sprintf("#%d", idx))
+	for _, dxfPoly := range dxfFile.polyline {
+		output = append(output, newPolyline(dxfPoly, fmt.Sprintf("#%d", len(output))))
+	}
+
+	for _, dxfPoly := range dxfFile.lwPolyline {
+		output = append(output, newLightPolyline(dxfPoly, fmt.Sprintf("#%d", len(output))))
 	}
 
 	return buildPath(output)

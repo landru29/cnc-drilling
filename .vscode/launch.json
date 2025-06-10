@@ -59,5 +59,16 @@
                 "../testdata/polyline.dxf"
             ]
         },
+        {
+            "name": "Engrave circle",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd",
+            "args": [
+                "engrave",
+                "../testdata/arc.dxf"
+            ]
+        },
     ]
 }

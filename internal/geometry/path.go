@@ -29,7 +29,7 @@ func (p Path) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 	}
 
 	for _, segment := range p {
-		localConf := append([]gcode.Configurator{gcode.WithoutStart()}, configs...)
+		localConf := append([]gcode.Configurator{gcode.WithoutStart(), gcode.WithoutEnd()}, configs...)
 
 		out, err := gcode.Marshal(segment, localConf...)
 		if err != nil {
@@ -39,7 +39,11 @@ func (p Path) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 		output += string(out)
 	}
 
-	return []byte(fmt.Sprintf("%sG0 Z%.01f\n", output, options.SecurityZ)), nil
+	if !options.IgnoreEnd {
+		output += fmt.Sprintf("G0 Z%.01f\n", options.SecurityZ)
+	}
+
+	return []byte(output), nil
 }
 
 // Start implements the Linker interface.
