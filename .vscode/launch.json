@@ -23,6 +23,9 @@
             "program": "${workspaceFolder}/cmd",
             "args": [
                 "drill",
+                "-d", "10.0",
+                "--deep-per-try", "3",
+                "-f", "320",
                 "../testdata/point01.dxf"
             ]
         },
@@ -34,6 +37,8 @@
             "program": "${workspaceFolder}/cmd",
             "args": [
                 "engrave",
+                "-d", "10.0",
+                "--deep-per-try", "3",
                 "../testdata/rectangle.dxf"
             ]
         },
@@ -45,6 +50,8 @@
             "program": "${workspaceFolder}/cmd",
             "args": [
                 "engrave",
+                "-d", "10.0",
+                "--deep-per-try", "5",
                 "../testdata/point01.dxf"
             ]
         },

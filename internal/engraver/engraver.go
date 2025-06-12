@@ -3,7 +3,6 @@ package engraver
 import (
 	"fmt"
 	"io"
-	"slices"
 
 	"github.com/landru29/cnc-drilling/internal/gcode"
 	"github.com/landru29/cnc-drilling/internal/geometry"
@@ -32,11 +31,7 @@ func Process(in io.Reader, out io.Writer, config information.Config) error {
 	polylines := []*entity.Polyline{}
 	circles := []*entity.Circle{}
 
-	for _, geometry := range drawing.Entities() {
-		if len(config.Layer) > 0 && !slices.Contains(config.Layer, geometry.Layer().Name()) {
-			continue
-		}
-
+	for _, geometry := range geometry.FilterEntities(drawing.Entities(), config.Layers...) {
 		if arc, ok := geometry.(*entity.Arc); ok {
 			arcs = append(arcs, arc)
 		}
@@ -65,23 +60,29 @@ func Process(in io.Reader, out io.Writer, config information.Config) error {
 		geometry.WithDXFPolyline(polylines...),
 		geometry.WithDXFCircle(circles...),
 	) {
-		code, err := gcode.Marshal(
-			path,
-			gcode.WithDeep(config.Deepness),
-			gcode.WithFeed(config.SpeedMillimeterPerMinute),
-			gcode.WithSecurityZ(config.SecurityZ),
-		)
-		if err != nil {
-			return err
-		}
+		tryDeeps := config.TryDeeps()
 
-		if _, err := fmt.Fprintf(
-			out,
-			";--- Path #%d ---\n%s",
-			idx,
-			string(code),
-		); err != nil {
-			return err
+		for deepIndex, deep := range tryDeeps {
+			code, err := gcode.Marshal(
+				path,
+				gcode.WithDeep(deep),
+				gcode.WithFeed(config.SpeedMillimeterPerMinute),
+				gcode.WithSecurityZ(config.SecurityZ),
+			)
+			if err != nil {
+				return err
+			}
+
+			if _, err := fmt.Fprintf(
+				out,
+				";\n;=== Path #%d %d/%d ===\n%s",
+				idx,
+				deepIndex+1,
+				len(tryDeeps),
+				string(code),
+			); err != nil {
+				return err
+			}
 		}
 	}
 

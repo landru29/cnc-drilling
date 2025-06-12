@@ -18,7 +18,8 @@ func (p Point) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 		config(&options)
 	}
 
-	return []byte(fmt.Sprintf("G0 X%.01F Y%.01f\nG1 Z%.01f F%.01f\nG0 Z%.01f\n",
+	return []byte(fmt.Sprintf(";------ Point %s\nG0 X%.01F Y%.01f\nG1 Z%.01f F%.01f; Tool down\nG0 Z%.01f; Tool up\n",
+		p.Name,
 		p.X, p.Y,
 		-options.Deep,
 		options.Feed,
@@ -37,7 +38,7 @@ func PointsFromDXFPoints(configs ...dxfConfigurator) []Point {
 
 	for idx, dxfPoint := range dxfFile.points {
 		inputPoints[idx] = Point{
-			Name: fmt.Sprintf("#%d", idx),
+			Name: fmt.Sprintf("#%d / Layer %s", idx, dxfPoint.Layer().Name()),
 			Coordinates: Coordinates{
 				X: dxfPoint.Coord[0],
 				Y: dxfPoint.Coord[1],

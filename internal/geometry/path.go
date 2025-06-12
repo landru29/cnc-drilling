@@ -20,7 +20,7 @@ func (p Path) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 	if !options.IgnoreStart {
 		start := p.Start()
 		output = fmt.Sprintf(
-			"G0 X%.01f Y%.01f\nG1 Z%.01f F%.01f \n",
+			"G0 X%.01f Y%.01f\nG1 Z%.01f F%.01f; Tool down\n",
 			start.X,
 			start.Y,
 			-options.Deep,
@@ -40,7 +40,7 @@ func (p Path) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 	}
 
 	if !options.IgnoreEnd {
-		output += fmt.Sprintf("G0 Z%.01f\n", options.SecurityZ)
+		output += fmt.Sprintf("G0 Z%.01f; Tool up\n", options.SecurityZ)
 	}
 
 	return []byte(output), nil

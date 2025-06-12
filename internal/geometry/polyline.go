@@ -19,7 +19,7 @@ func newPolyline(polyline *entity.Polyline, name string) *Path {
 
 		if center != nil && ray != 0 {
 			output[idx] = &Curve{
-				Name: fmt.Sprintf("%s #%d", name, idx),
+				Name: fmt.Sprintf("%s #%d / Layer %s", name, idx, polyline.Layer().Name()),
 				StartPoint: Coordinates{
 					X: currentVertex.Coord[0],
 					Y: currentVertex.Coord[1],
@@ -71,7 +71,7 @@ func newLightPolyline(polyline *entity.LwPolyline, name string) *Path {
 		center, ray := polyline.Bulge(idx + 1)
 		if center != nil && ray != 0 {
 			output[idx] = &Curve{
-				Name: fmt.Sprintf("%s #%d", name, idx),
+				Name: fmt.Sprintf("%s #%d / Layer %s", name, idx, polyline.Layer().Name()),
 				StartPoint: Coordinates{
 					X: currentVertex[0],
 					Y: currentVertex[1],
