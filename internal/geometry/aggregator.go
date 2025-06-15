@@ -10,6 +10,7 @@ type Linker interface {
 	End() *Coordinates
 	Revert()
 	Weight(Linker) [2]float64
+	Box() Box
 }
 
 type LinkerSort struct {

@@ -2,6 +2,7 @@ package geometry
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/landru29/cnc-drilling/internal/gcode"
 )
@@ -26,6 +27,20 @@ func (s *Segment) Revert() {
 
 func (s Segment) Weight(other Linker) [2]float64 {
 	return s.EndPoint.Weight(other)
+}
+
+// Box implements the Linker interface.
+func (s Segment) Box() Box {
+	return Box{
+		Min: Coordinates{
+			X: math.Min(s.StartPoint.X, s.EndPoint.X),
+			Y: math.Min(s.StartPoint.Y, s.EndPoint.Y),
+		},
+		Max: Coordinates{
+			X: math.Max(s.StartPoint.X, s.EndPoint.X),
+			Y: math.Max(s.StartPoint.Y, s.EndPoint.Y),
+		},
+	}
 }
 
 // MarshallGCode implements the Marshaler interface.

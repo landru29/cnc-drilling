@@ -41,3 +41,11 @@ func (c Coordinates) weight(other Coordinates) float64 {
 func (c Coordinates) Equal(other Coordinates) bool {
 	return c.weight(other) < 0.00001
 }
+
+// Box implements the Linker interface.
+func (c Coordinates) Box() Box {
+	return Box{
+		Min: c,
+		Max: c,
+	}
+}

@@ -75,6 +75,21 @@ func (p Path) Revert() {
 	}
 }
 
+// Box implements the Linker interface.
+func (p Path) Box() Box {
+	if len(p) == 0 {
+		return Box{}
+	}
+
+	output := p[0].Box()
+
+	for _, elt := range p[1:] {
+		output = output.Merge(elt.Box())
+	}
+
+	return output
+}
+
 // Weight implements the Linker interface.
 func (p Path) Weight(other Linker) [2]float64 {
 	if len(p) == 0 {
