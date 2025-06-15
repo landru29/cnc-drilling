@@ -25,14 +25,14 @@ func NewCurveFromArc(name string, data *entity.Arc) *Curve {
 			Y: data.Center[1],
 		},
 		StartPoint: Coordinates{
-			X: math.Cos(data.Angle[0]*math.Pi/180)*data.Radius + data.Center[0],
-			Y: math.Sin(data.Angle[0]*math.Pi/180)*data.Radius + data.Center[1],
-		},
-		EndPoint: Coordinates{
 			X: math.Cos(data.Angle[1]*math.Pi/180)*data.Radius + data.Center[0],
 			Y: math.Sin(data.Angle[1]*math.Pi/180)*data.Radius + data.Center[1],
 		},
-		Clockwise: math.Mod((data.Angle[1]+360.0-data.Angle[0]), 360.0) > 0,
+		EndPoint: Coordinates{
+			X: math.Cos(data.Angle[0]*math.Pi/180)*data.Radius + data.Center[0],
+			Y: math.Sin(data.Angle[0]*math.Pi/180)*data.Radius + data.Center[1],
+		},
+		Clockwise: math.Mod((data.Angle[1]+360.0-data.Angle[0]), 360.0) < 0,
 		Radius:    data.Radius,
 	}
 }
@@ -76,32 +76,56 @@ func quarter(center Coordinates, point Coordinates) int {
 
 // Box implements the Linker interface.
 func (c Curve) Box() Box {
-	startQuarter := quarter(c.Center, c.StartPoint)
-	endQuarter := quarter(c.Center, c.EndPoint)
+	currentCurve := c
 
-	maxX := math.Max(c.StartPoint.X, c.EndPoint.X)
-	maxY := math.Max(c.StartPoint.Y, c.EndPoint.Y)
-	minX := math.Min(c.StartPoint.X, c.EndPoint.X)
-	minY := math.Min(c.StartPoint.Y, c.EndPoint.Y)
+	if c.Clockwise {
+		currentCurve = Curve{
+			StartPoint: c.EndPoint,
+			EndPoint:   c.StartPoint,
+			Center:     c.Center,
+			Radius:     c.Radius,
+		}
+	}
+
+	startQuarter := quarter(currentCurve.Center, currentCurve.StartPoint)
+	endQuarter := quarter(currentCurve.Center, currentCurve.EndPoint)
+
+	maxX := math.Max(currentCurve.StartPoint.X, currentCurve.EndPoint.X)
+	maxY := math.Max(currentCurve.StartPoint.Y, currentCurve.EndPoint.Y)
+	minX := math.Min(currentCurve.StartPoint.X, currentCurve.EndPoint.X)
+	minY := math.Min(currentCurve.StartPoint.Y, currentCurve.EndPoint.Y)
+
+	if startQuarter == endQuarter {
+		return Box{
+			Min: Coordinates{
+				X: minX,
+				Y: minY,
+			},
+			Max: Coordinates{
+				X: maxX,
+				Y: maxY,
+			},
+		}
+	}
 
 	if startQuarter == 1 || endQuarter == 2 {
-		maxX = c.Center.X + c.Radius
+		maxX = currentCurve.Center.X + currentCurve.Radius
 	}
 
 	if startQuarter == 2 || endQuarter == 3 {
-		minY = c.Center.Y - c.Radius
+		minY = currentCurve.Center.Y - currentCurve.Radius
 	}
 
 	if startQuarter == 3 || endQuarter == 4 {
-		minX = c.Center.X - c.Radius
+		minX = currentCurve.Center.X - currentCurve.Radius
 	}
 
 	if startQuarter == 4 || endQuarter == 1 {
-		maxY = c.Center.Y + c.Radius
+		maxY = currentCurve.Center.Y + currentCurve.Radius
 	}
 
 	if (startQuarter == 1 || startQuarter == 2) && endQuarter == 4 {
-		minY = c.Center.Y - c.Radius
+		minY = currentCurve.Center.Y - currentCurve.Radius
 	}
 
 	return Box{

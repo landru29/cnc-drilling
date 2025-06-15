@@ -20,8 +20,8 @@ func (b Box) Merge(others ...Box) Box {
 				Y: math.Min(output.Min.Y, box.Min.Y),
 			},
 			Max: Coordinates{
-				X: math.Max(output.Min.X, box.Min.X),
-				Y: math.Max(output.Min.Y, box.Min.Y),
+				X: math.Max(output.Max.X, box.Max.X),
+				Y: math.Max(output.Max.Y, box.Max.Y),
 			},
 		}
 	}

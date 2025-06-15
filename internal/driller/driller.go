@@ -26,11 +26,34 @@ func Process(in io.Reader, out io.Writer, config information.Config) error {
 	}
 
 	setOfPoints := []*entity.Point{}
+	var (
+		box *geometry.Box
+	)
 
-	for _, geometry := range geometry.FilterEntities(drawing.Entities(), config.Layers...) {
-		if point, ok := geometry.(*entity.Point); ok {
+	for _, geometryElement := range geometry.FilterEntities(drawing.Entities(), config.Layers...) {
+		if point, ok := geometryElement.(*entity.Point); ok {
 			setOfPoints = append(setOfPoints, point)
+
+			data := geometry.NewLinker("", geometryElement)
+			if data == nil {
+				continue
+			}
+
+			currentBox := data.Box()
+
+			if box == nil {
+				box = &currentBox
+
+				continue
+			}
+
+			currentBox = currentBox.Merge(*box)
+			box = &currentBox
 		}
+	}
+
+	if box != nil {
+		config.Box = *box
 	}
 
 	for idx, point := range geometry.PointsFromDXFPoints(geometry.WithDXFPoints(setOfPoints...)) {
@@ -42,7 +65,7 @@ func Process(in io.Reader, out io.Writer, config information.Config) error {
 				gcode.WithDeep(deep),
 				gcode.WithFeed(config.SpeedMillimeterPerMinute),
 				gcode.WithSecurityZ(config.SecurityZ),
-				gcode.WithOffset([]float64{config.Origin.X, config.Origin.Y}),
+				gcode.WithOffset(config.CalcOrigin()),
 			)
 			if err != nil {
 				return err

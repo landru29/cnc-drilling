@@ -16,7 +16,8 @@ type Config struct {
 	Deepness                 float64
 	DeepPerTry               float64
 	Layers                   []string
-	Origin                   geometry.Coordinates
+	Origin                   OriginDetection
+	Box                      geometry.Box
 }
 
 type counters struct {
@@ -29,7 +30,7 @@ type counters struct {
 	vertices       int
 }
 
-func Process(in io.Reader, out io.Writer) error {
+func Process(in io.Reader, out io.Writer, config Config) error {
 	drawing, err := dxf.FromReader(in)
 	if err != nil {
 		return err
@@ -43,14 +44,21 @@ func Process(in io.Reader, out io.Writer) error {
 		return err
 	}
 
-	for _, layer := range drawing.Layers {
+	layers := config.Layers
+	if len(layers) == 0 {
+		for _, layer := range drawing.Layers {
+			layers = append(layers, layer.Name())
+		}
+	}
+
+	for _, layer := range layers {
 		isDefault := ""
 
-		if drawing.CurrentLayer.Name() == layer.Name() {
+		if drawing.CurrentLayer.Name() == layer {
 			isDefault = " [default]"
 		}
 
-		if _, err := fmt.Fprintf(out, "\t* %s%s\n", layer.Name(), isDefault); err != nil {
+		if _, err := fmt.Fprintf(out, "\t* %s%s\n", layer, isDefault); err != nil {
 			return err
 		}
 
@@ -59,7 +67,7 @@ func Process(in io.Reader, out io.Writer) error {
 			entityCounter counters
 		)
 
-		for idx, dxfEntity := range geometry.FilterEntities(drawing.Entities(), layer.Name()) {
+		for idx, dxfEntity := range geometry.FilterEntities(drawing.Entities(), layer) {
 			switch dxfEntity.(type) {
 			case *entity.Point:
 				entityCounter.points++
@@ -163,4 +171,12 @@ func (c Config) TryDeeps() []float64 {
 	}
 
 	return output
+}
+
+func (c Config) CalcOrigin() []float64 {
+	if c.Origin.Relative {
+		return []float64{c.Origin.Value.X + c.Box.Min.X, c.Origin.Value.Y + c.Box.Min.Y}
+	}
+
+	return []float64{c.Origin.Value.X, c.Origin.Value.Y}
 }
