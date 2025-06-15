@@ -5,12 +5,35 @@ import (
 	"math"
 
 	"github.com/landru29/cnc-drilling/internal/gcode"
+	"github.com/yofu/dxf/entity"
 )
 
 type Segment struct {
 	Name       string
 	StartPoint Coordinates
 	EndPoint   Coordinates
+}
+
+func NewSgmentFromPoints(name string, from *entity.Point, to *entity.Point) *Segment {
+	return &Segment{
+		Name:       name,
+		StartPoint: NewCoordinatesFromPoint(from),
+		EndPoint:   NewCoordinatesFromPoint(to),
+	}
+}
+
+func NewSgmentFromLine(name string, data *entity.Line) *Segment {
+	return &Segment{
+		Name: name,
+		StartPoint: Coordinates{
+			X: data.Start[0],
+			Y: data.Start[1],
+		},
+		EndPoint: Coordinates{
+			X: data.End[0],
+			Y: data.End[1],
+		},
+	}
 }
 
 func (s Segment) Start() *Coordinates {
@@ -57,8 +80,8 @@ func (s Segment) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 		output = fmt.Sprintf(
 			"; * %s\nG0 X%.01f Y%.01f\nG1 Z%.01f F%.01f; Tool down\n",
 			s.Name,
-			start.X,
-			start.Y,
+			start.X-options.OffsetX(),
+			start.Y-options.OffsetY(),
 			-options.Deep,
 			options.Feed,
 		)
@@ -66,8 +89,8 @@ func (s Segment) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 
 	output += fmt.Sprintf(
 		"G1 X%.01f Y%.01f F%.01f\n",
-		s.EndPoint.X,
-		s.EndPoint.Y,
+		s.EndPoint.X-options.OffsetX(),
+		s.EndPoint.Y-options.OffsetY(),
 		options.Feed,
 	)
 

@@ -42,6 +42,7 @@ func Process(in io.Reader, out io.Writer, config information.Config) error {
 				gcode.WithDeep(deep),
 				gcode.WithFeed(config.SpeedMillimeterPerMinute),
 				gcode.WithSecurityZ(config.SecurityZ),
+				gcode.WithOffset([]float64{config.Origin.X, config.Origin.Y}),
 			)
 			if err != nil {
 				return err

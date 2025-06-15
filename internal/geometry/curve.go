@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/landru29/cnc-drilling/internal/gcode"
+	"github.com/yofu/dxf/entity"
 )
 
 type Curve struct {
@@ -14,6 +15,26 @@ type Curve struct {
 	Center     Coordinates
 	Radius     float64
 	Clockwise  bool
+}
+
+func NewCurveFromArc(name string, data *entity.Arc) *Curve {
+	return &Curve{
+		Name: name,
+		Center: Coordinates{
+			X: data.Center[0],
+			Y: data.Center[1],
+		},
+		StartPoint: Coordinates{
+			X: math.Cos(data.Angle[0]*math.Pi/180)*data.Radius + data.Center[0],
+			Y: math.Sin(data.Angle[0]*math.Pi/180)*data.Radius + data.Center[1],
+		},
+		EndPoint: Coordinates{
+			X: math.Cos(data.Angle[1]*math.Pi/180)*data.Radius + data.Center[0],
+			Y: math.Sin(data.Angle[1]*math.Pi/180)*data.Radius + data.Center[1],
+		},
+		Clockwise: math.Mod((data.Angle[1]+360.0-data.Angle[0]), 360.0) > 0,
+		Radius:    data.Radius,
+	}
 }
 
 // Start implements the Linker interface.
@@ -38,22 +59,25 @@ func (c Curve) Weight(other Linker) [2]float64 {
 }
 
 func quarter(center Coordinates, point Coordinates) int {
+	xSign := math.Signbit(point.X - center.X)
+	ySign := math.Signbit(point.Y - center.Y)
+
 	return map[bool]map[bool]int{
-		true: {
-			true:  1,
-			false: 2,
-		},
 		false: {
+			false: 1,
+			true:  2,
+		},
+		true: {
 			true:  3,
 			false: 4,
 		},
-	}[math.Signbit(point.X-center.X)][math.Signbit(point.Y-center.Y)]
+	}[xSign][ySign]
 }
 
 // Box implements the Linker interface.
 func (c Curve) Box() Box {
 	startQuarter := quarter(c.Center, c.StartPoint)
-	endQuarter := quarter(c.Center, c.StartPoint)
+	endQuarter := quarter(c.Center, c.EndPoint)
 
 	maxX := math.Max(c.StartPoint.X, c.EndPoint.X)
 	maxY := math.Max(c.StartPoint.Y, c.EndPoint.Y)
@@ -74,6 +98,10 @@ func (c Curve) Box() Box {
 
 	if startQuarter == 4 || endQuarter == 1 {
 		maxY = c.Center.Y + c.Radius
+	}
+
+	if (startQuarter == 1 || startQuarter == 2) && endQuarter == 4 {
+		minY = c.Center.Y - c.Radius
 	}
 
 	return Box{
@@ -101,8 +129,8 @@ func (c Curve) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 		start := c.Start()
 		output = fmt.Sprintf(
 			"G0 X%.01f Y%.01f\nG1 Z%.01f F%.01f ; Tool down\n",
-			start.X,
-			start.Y,
+			start.X-options.OffsetX(),
+			start.Y-options.OffsetY(),
 			-options.Deep,
 			options.Feed,
 		)
@@ -116,8 +144,8 @@ func (c Curve) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 	output += fmt.Sprintf(
 		"G%d X%.01f Y%.01f I%.01f J%.01f F%.01f\n",
 		code,
-		c.EndPoint.X,
-		c.EndPoint.Y,
+		c.EndPoint.X-options.OffsetX(),
+		c.EndPoint.Y-options.OffsetY(),
 		c.Center.X-c.StartPoint.X,
 		c.Center.Y-c.StartPoint.Y,
 		options.Feed,

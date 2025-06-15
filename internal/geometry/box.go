@@ -1,6 +1,9 @@
 package geometry
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 type Box struct {
 	Min Coordinates
@@ -24,4 +27,15 @@ func (b Box) Merge(others ...Box) Box {
 	}
 
 	return output
+}
+
+// String implements the Stringer interface.
+func (b Box) String() string {
+	return fmt.Sprintf(
+		"[(%.03f, %.03f), (%.03f, %.03f)]",
+		b.Min.X,
+		b.Min.Y,
+		b.Max.X,
+		b.Max.Y,
+	)
 }
