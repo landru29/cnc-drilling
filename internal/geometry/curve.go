@@ -152,7 +152,7 @@ func (c Curve) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 	if !options.IgnoreStart {
 		start := c.Start()
 		output = fmt.Sprintf(
-			"G0 X%.01f Y%.01f\nG1 Z%.01f F%.01f ; Tool down\n",
+			"G0 X%.03f Y%.03f\nG1 Z%.03f F%.03f ; Tool down\n",
 			start.X-options.OffsetX(),
 			start.Y-options.OffsetY(),
 			-options.Deep,
@@ -166,7 +166,7 @@ func (c Curve) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 	}
 
 	output += fmt.Sprintf(
-		"G%d X%.01f Y%.01f I%.01f J%.01f F%.01f\n",
+		"G%d X%.03f Y%.03f I%.03f J%.03f F%.03f\n",
 		code,
 		c.EndPoint.X-options.OffsetX(),
 		c.EndPoint.Y-options.OffsetY(),

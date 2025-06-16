@@ -33,7 +33,7 @@ func (p Point) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 		config(&options)
 	}
 
-	return []byte(fmt.Sprintf(";------ Point %s\nG0 X%.01F Y%.01f\nG1 Z%.01f F%.01f; Tool down\nG0 Z%.01f; Tool up\n",
+	return []byte(fmt.Sprintf(";------ Point %s\nG0 X%.03f Y%.03f\nG1 Z%.03f F%.03f; Tool down\nG0 Z%.03f; Tool up\n",
 		p.Name,
 		p.X-options.OffsetX(),
 		p.Y-options.OffsetY(),
