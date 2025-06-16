@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func infoCommand(files *[]string) *cobra.Command {
+func infoCommand(files *[]string, config *information.Config) *cobra.Command {
 	return &cobra.Command{
 		Use:   "info <filename.dxf>",
 		Short: "Display informations about DXF",
@@ -25,7 +25,7 @@ func infoCommand(files *[]string) *cobra.Command {
 					_ = closer.Close()
 				}(fileDesc)
 
-				if err := information.Process(fileDesc, cmd.OutOrStdout()); err != nil {
+				if err := information.Process(fileDesc, cmd.OutOrStdout(), *config); err != nil {
 					return err
 				}
 			}

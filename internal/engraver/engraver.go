@@ -31,26 +31,50 @@ func Process(in io.Reader, out io.Writer, config information.Config) error {
 	polylines := []*entity.Polyline{}
 	circles := []*entity.Circle{}
 
-	for _, geometry := range geometry.FilterEntities(drawing.Entities(), config.Layers...) {
-		if arc, ok := geometry.(*entity.Arc); ok {
+	var (
+		box *geometry.Box
+	)
+
+	for _, geometryElement := range geometry.FilterEntities(drawing.Entities(), config.Layers...) {
+		if arc, ok := geometryElement.(*entity.Arc); ok {
 			arcs = append(arcs, arc)
 		}
 
-		if line, ok := geometry.(*entity.Line); ok {
+		if line, ok := geometryElement.(*entity.Line); ok {
 			lines = append(lines, line)
 		}
 
-		if lightPolyline, ok := geometry.(*entity.LwPolyline); ok {
+		if lightPolyline, ok := geometryElement.(*entity.LwPolyline); ok {
 			lightPolylines = append(lightPolylines, lightPolyline)
 		}
 
-		if polyline, ok := geometry.(*entity.Polyline); ok {
+		if polyline, ok := geometryElement.(*entity.Polyline); ok {
 			polylines = append(polylines, polyline)
 		}
 
-		if circle, ok := geometry.(*entity.Circle); ok {
+		if circle, ok := geometryElement.(*entity.Circle); ok {
 			circles = append(circles, circle)
 		}
+
+		data := geometry.NewLinker("", geometryElement)
+		if data == nil {
+			continue
+		}
+
+		currentBox := data.Box()
+
+		if box == nil {
+			box = &currentBox
+
+			continue
+		}
+
+		currentBox = currentBox.Merge(*box)
+		box = &currentBox
+	}
+
+	if box != nil {
+		config.Box = *box
 	}
 
 	for idx, path := range geometry.PathsFromDXF(
@@ -68,6 +92,7 @@ func Process(in io.Reader, out io.Writer, config information.Config) error {
 				gcode.WithDeep(deep),
 				gcode.WithFeed(config.SpeedMillimeterPerMinute),
 				gcode.WithSecurityZ(config.SecurityZ),
+				gcode.WithOffset(config.CalcOrigin()),
 			)
 			if err != nil {
 				return err

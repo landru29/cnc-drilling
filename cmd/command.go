@@ -39,7 +39,7 @@ func mainCommand() *cobra.Command {
 	output.AddCommand(
 		drillCommand(&files, &config),
 		engraveCommand(&files, &config),
-		infoCommand(&files),
+		infoCommand(&files, &config),
 	)
 
 	return output

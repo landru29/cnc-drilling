@@ -6,7 +6,7 @@ import (
 	"github.com/yofu/dxf/entity"
 )
 
-func newPolyline(polyline *entity.Polyline, name string) *Path {
+func NewPathFromPolyline(name string, polyline *entity.Polyline) *Path {
 	if polyline == nil || len(polyline.Vertices) < 2 {
 		return nil
 	}
@@ -19,15 +19,9 @@ func newPolyline(polyline *entity.Polyline, name string) *Path {
 
 		if center != nil && ray != 0 {
 			output[idx] = &Curve{
-				Name: fmt.Sprintf("%s #%d / Layer %s", name, idx, polyline.Layer().Name()),
-				StartPoint: Coordinates{
-					X: currentVertex.Coord[0],
-					Y: currentVertex.Coord[1],
-				},
-				EndPoint: Coordinates{
-					X: vertex.Coord[0],
-					Y: vertex.Coord[1],
-				},
+				Name:       fmt.Sprintf("%s #%d / Layer %s", name, idx, polyline.Layer().Name()),
+				StartPoint: NewCoordinatesFromVertex(currentVertex),
+				EndPoint:   NewCoordinatesFromVertex(vertex),
 				Center: Coordinates{
 					X: center[0],
 					Y: center[1],
@@ -42,15 +36,9 @@ func newPolyline(polyline *entity.Polyline, name string) *Path {
 		}
 
 		output[idx] = &Segment{
-			Name: fmt.Sprintf("%s #%d", name, idx),
-			StartPoint: Coordinates{
-				X: currentVertex.Coord[0],
-				Y: currentVertex.Coord[1],
-			},
-			EndPoint: Coordinates{
-				X: vertex.Coord[0],
-				Y: vertex.Coord[1],
-			},
+			Name:       fmt.Sprintf("%s #%d", name, idx),
+			StartPoint: NewCoordinatesFromVertex(currentVertex),
+			EndPoint:   NewCoordinatesFromVertex(vertex),
 		}
 
 		currentVertex = vertex
@@ -59,7 +47,7 @@ func newPolyline(polyline *entity.Polyline, name string) *Path {
 	return &output
 }
 
-func newLightPolyline(polyline *entity.LwPolyline, name string) *Path {
+func NewPathFromLightPolyline(name string, polyline *entity.LwPolyline) *Path {
 	if polyline == nil || len(polyline.Vertices) < 2 {
 		return nil
 	}

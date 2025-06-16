@@ -49,6 +49,7 @@ func drillCommand(files *[]string, config *information.Config) *cobra.Command {
 
 	output.Flags().Float64VarP(&config.Deepness, "deep", "d", 5, "drilling deep in millimeters")
 	output.Flags().Float64VarP(&config.DeepPerTry, "deep-per-try", "", 5, "max deep in millimeters during one try")
+	output.Flags().VarP(&config.Origin, "origin", "o", "shift origin")
 
 	return output
 }

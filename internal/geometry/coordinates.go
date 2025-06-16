@@ -1,8 +1,72 @@
 package geometry
 
+import (
+	"errors"
+	"fmt"
+	"strconv"
+	"strings"
+
+	"github.com/yofu/dxf/entity"
+)
+
 type Coordinates struct {
 	X float64
 	Y float64
+}
+
+func NewCoordinatesFromPoint(data *entity.Point) Coordinates {
+	if data == nil {
+		return Coordinates{}
+	}
+
+	return Coordinates{
+		X: data.Coord[0],
+		Y: data.Coord[1],
+	}
+}
+
+func NewCoordinatesFromVertex(data *entity.Vertex) Coordinates {
+	if data == nil {
+		return Coordinates{}
+	}
+
+	return Coordinates{
+		X: data.Coord[0],
+		Y: data.Coord[1],
+	}
+}
+
+// String implements the pflag.Value interface.
+func (c Coordinates) String() string {
+	return fmt.Sprintf("(%.01f, %.01f)", c.X, c.Y)
+}
+
+// Set implements the pflag.Value interface.
+func (c *Coordinates) Set(data string) error {
+	splitter := strings.Split(data, ",")
+	if len(splitter) != 2 {
+		return errors.New("coordinates must be 0.0,0.0")
+	}
+
+	xValue, err := strconv.ParseFloat(strings.TrimSpace(splitter[0]), 64)
+	if err != nil {
+		return err
+	}
+
+	yValue, err := strconv.ParseFloat(strings.TrimSpace(splitter[1]), 64)
+	if err != nil {
+		return err
+	}
+
+	c.X = xValue
+	c.Y = yValue
+
+	return nil
+}
+
+// Type implements the pflag.Value interface.
+func (c Coordinates) Type() string {
+	return "Coordinate"
 }
 
 // Start implements the Linker interface.
@@ -40,4 +104,12 @@ func (c Coordinates) weight(other Coordinates) float64 {
 
 func (c Coordinates) Equal(other Coordinates) bool {
 	return c.weight(other) < 0.00001
+}
+
+// Box implements the Linker interface.
+func (c Coordinates) Box() Box {
+	return Box{
+		Min: c,
+		Max: c,
+	}
 }

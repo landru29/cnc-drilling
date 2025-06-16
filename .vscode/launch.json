@@ -12,7 +12,8 @@
             "program": "${workspaceFolder}/cmd",
             "args": [
                 "info",
-                "../testdata/point01.dxf"
+                "--layer", "decoupe1",
+                "../testdata/baloon.dxf"
             ]
         },
         {
@@ -26,7 +27,23 @@
                 "-d", "10.0",
                 "--deep-per-try", "3",
                 "-f", "320",
+                "-o", "@100,100",
                 "../testdata/point01.dxf"
+            ]
+        },
+        {
+            "name": "Engrave arcs",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd",
+            "args": [
+                "engrave",
+                "-d", "10.0",
+                "--deep-per-try", "3",
+                "-o", "@-10,-10",
+                "--layer", "decoupe1",
+                "../testdata/baloon.dxf"
             ]
         },
         {

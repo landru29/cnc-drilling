@@ -4,9 +4,47 @@ import (
 	"fmt"
 
 	"github.com/landru29/cnc-drilling/internal/gcode"
+	"github.com/yofu/dxf/entity"
 )
 
 type Path []Linker
+
+func NewPathFromCircle(name string, data *entity.Circle) *Path {
+	return &Path{
+		&Curve{
+			Name: fmt.Sprintf("%s (1/2)", name),
+			Center: Coordinates{
+				X: data.Center[0],
+				Y: data.Center[1],
+			},
+			Radius: data.Radius,
+			StartPoint: Coordinates{
+				X: data.Center[0] + data.Radius,
+				Y: data.Center[1],
+			},
+			EndPoint: Coordinates{
+				X: data.Center[0] - data.Radius,
+				Y: data.Center[1],
+			},
+		},
+		&Curve{
+			Name: fmt.Sprintf("%s (2/2)", name),
+			Center: Coordinates{
+				X: data.Center[0],
+				Y: data.Center[1],
+			},
+			Radius: data.Radius,
+			StartPoint: Coordinates{
+				X: data.Center[0] - data.Radius,
+				Y: data.Center[1],
+			},
+			EndPoint: Coordinates{
+				X: data.Center[0] + data.Radius,
+				Y: data.Center[1],
+			},
+		},
+	}
+}
 
 // MarshallGCode implements the Marshaler interface.
 func (p Path) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
@@ -20,18 +58,18 @@ func (p Path) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 	if !options.IgnoreStart {
 		start := p.Start()
 		output = fmt.Sprintf(
-			"G0 X%.01f Y%.01f\nG1 Z%.01f F%.01f; Tool down\n",
-			start.X,
-			start.Y,
+			"G0 X%.03f Y%.03f\nG1 Z%.03f F%.03f; Tool down\n",
+			start.X-options.OffsetX(),
+			start.Y-options.OffsetY(),
 			-options.Deep,
 			options.Feed,
 		)
 	}
 
-	for _, segment := range p {
+	for _, segmentOrCurve := range p {
 		localConf := append([]gcode.Configurator{gcode.WithoutStart(), gcode.WithoutEnd()}, configs...)
 
-		out, err := gcode.Marshal(segment, localConf...)
+		out, err := gcode.Marshal(segmentOrCurve, localConf...)
 		if err != nil {
 			return nil, err
 		}
@@ -40,7 +78,7 @@ func (p Path) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 	}
 
 	if !options.IgnoreEnd {
-		output += fmt.Sprintf("G0 Z%.01f; Tool up\n", options.SecurityZ)
+		output += fmt.Sprintf("G0 Z%.03f; Tool up\n", options.SecurityZ)
 	}
 
 	return []byte(output), nil
@@ -73,6 +111,21 @@ func (p Path) Revert() {
 	for idx := range p {
 		p[idx].Revert()
 	}
+}
+
+// Box implements the Linker interface.
+func (p Path) Box() Box {
+	if len(p) == 0 {
+		return Box{}
+	}
+
+	output := p[0].Box()
+
+	for _, elt := range p[1:] {
+		output = output.Merge(elt.Box())
+	}
+
+	return output
 }
 
 // Weight implements the Linker interface.

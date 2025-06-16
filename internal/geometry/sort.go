@@ -5,13 +5,6 @@ import (
 	"sort"
 )
 
-type Linker interface {
-	Start() *Coordinates
-	End() *Coordinates
-	Revert()
-	Weight(Linker) [2]float64
-}
-
 type LinkerSort struct {
 	data []Linker
 
@@ -44,10 +37,6 @@ func nextEntity(entities []Linker, from Linker, filter func(from Linker, to Link
 	}
 
 	copy(sorter.data, entities)
-
-	// for idx, entity := range entities {
-	// 	sorter.data[idx] = entity
-	// }
 
 	sort.Sort(&sorter)
 
