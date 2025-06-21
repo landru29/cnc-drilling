@@ -11,6 +11,7 @@ type Box struct {
 	Max Coordinates
 }
 
+// Merge is the Union of many boxes.
 func (b Box) Merge(others ...Box) Box {
 	output := b
 

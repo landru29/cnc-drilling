@@ -10,3 +10,21 @@ Only arcs and lines are taken into account with command `engrave`.
 go run ./cmd drill -d 10 -f 30 -z 20 ./testdata/point01.dxf
 go run ./cmd engrave -d 10 -f 30 -z 20 ./testdata/rectangle.dxf
 ```
+
+## Configuration
+
+Some parameters can be set in a config file. The config file is looked for in the following order:
+* `./config.yaml`
+* `$HOME/.cnc-drilling/config.yaml`
+* `/etc/cnc-drilling/config.yaml`
+
+Use the following command to generate `./config.yaml` as a model:
+
+```bash
+go run ./cmd save-config
+```
+
+## Environment variables
+
+The following environment variables can be set:
+
