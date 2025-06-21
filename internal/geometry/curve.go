@@ -8,6 +8,7 @@ import (
 	"github.com/yofu/dxf/entity"
 )
 
+// Curve is a curved segment.
 type Curve struct {
 	Name       string
 	StartPoint Coordinates
@@ -17,6 +18,7 @@ type Curve struct {
 	Clockwise  bool
 }
 
+// NewCurveFromArc is a builder.
 func NewCurveFromArc(name string, data *entity.Arc) *Curve {
 	return &Curve{
 		Name: name,

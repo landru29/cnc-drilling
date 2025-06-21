@@ -7,8 +7,10 @@ import (
 	"github.com/yofu/dxf/entity"
 )
 
+// Path  is a set of geometry glue.
 type Path []Linker
 
+// NewPathFromCircle is a builder.
 func NewPathFromCircle(name string, data *entity.Circle) *Path {
 	return &Path{
 		&Curve{

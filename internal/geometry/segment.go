@@ -8,12 +8,14 @@ import (
 	"github.com/yofu/dxf/entity"
 )
 
+// Segment is a line between 2 points.
 type Segment struct {
 	Name       string
 	StartPoint Coordinates
 	EndPoint   Coordinates
 }
 
+// NewSgmentFromPoints is a builder.
 func NewSgmentFromPoints(name string, from *entity.Point, to *entity.Point) *Segment {
 	return &Segment{
 		Name:       name,
@@ -22,6 +24,7 @@ func NewSgmentFromPoints(name string, from *entity.Point, to *entity.Point) *Seg
 	}
 }
 
+// NewSgmentFromLine is a builder.
 func NewSgmentFromLine(name string, data *entity.Line) *Segment {
 	return &Segment{
 		Name: name,
@@ -36,18 +39,22 @@ func NewSgmentFromLine(name string, data *entity.Line) *Segment {
 	}
 }
 
+// Start implements the Linker interface.
 func (s Segment) Start() *Coordinates {
 	return &s.StartPoint
 }
 
+// End implements the Linker interface.
 func (s Segment) End() *Coordinates {
 	return &s.EndPoint
 }
 
+// Revert implements the Linker interface.
 func (s *Segment) Revert() {
 	s.StartPoint, s.EndPoint = s.EndPoint, s.StartPoint
 }
 
+// Weight implements the Linker interface.
 func (s Segment) Weight(other Linker) [2]float64 {
 	return s.EndPoint.Weight(other)
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/yofu/dxf/entity"
 )
 
+// Process is the engraving process.
 func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 	drawing, err := dxf.FromReader(in)
 	if err != nil {

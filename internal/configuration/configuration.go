@@ -4,15 +4,16 @@ import (
 	"math"
 )
 
+// Config is the main application configuration.
 type Config struct {
-	Feed         float64         `default:"60"     json:"feed"         mapstructure:"feed"          yaml:"feed"`
-	SecurityZ    float64         `default:"5"      json:"securityZ"    mapstructure:"security_z"    yaml:"securityZ"`
-	Deepness     float64         `default:"1"      json:"deepness"     mapstructure:"deepness"      yaml:"deepness"`
-	DeepPerTry   float64         `default:"0"      json:"deepPerTry"   mapstructure:"deep_per_try"  yaml:"deepPerTry"`
-	Layers       []string        `                 json:"layers"       mapstructure:"layers"        yaml:"layers"`
-	Origin       OriginDetection `                 json:"origin"       mapstructure:"origin"        yaml:"origin"`
-	BeforeScript string          `default:""       json:"beforeScript" mapstructure:"before_script" yaml:"beforeScript"`
-	AfterScript  string          `default:"G0X0Y0" json:"afterScript"  mapstructure:"before_script" yaml:"afterScript"`
+	Feed         float64         `default:"60"     json:"feed"           mapstructure:"feed"          yaml:"feed"`
+	SecurityZ    float64         `default:"5"      json:"security_z"     mapstructure:"security_z"    yaml:"security_z"`
+	Deepness     float64         `default:"1"      json:"deepness"       mapstructure:"deepness"      yaml:"deepness"`
+	DeepPerTry   float64         `default:"0"      json:"deep_per_try"   mapstructure:"deep_per_try"  yaml:"deep_per_try"`
+	Layers       []string        `                 json:"layers"         mapstructure:"layers"        yaml:"layers"`
+	Origin       OriginDetection `                 json:"origin"         mapstructure:"origin"        yaml:"origin"`
+	BeforeScript string          `default:""       json:"before_script"  mapstructure:"before_script" yaml:"before_script"`
+	AfterScript  string          `default:"G0X0Y0" json:"after_script"   mapstructure:"after_script"  yaml:"after_script"`
 }
 
 // TryDeeps is the set of deeps during all tries.

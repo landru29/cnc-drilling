@@ -5,6 +5,7 @@ import (
 	"math"
 )
 
+// Box is the cutting box.
 type Box struct {
 	Min Coordinates
 	Max Coordinates

@@ -5,16 +5,19 @@ import (
 	"sort"
 )
 
+// LinkerSort is a sorter to minimize the distance.
 type LinkerSort struct {
 	data []Linker
 
 	reference Linker
 }
 
+// Len implements the sort.Sorter interface.
 func (p LinkerSort) Len() int {
 	return len(p.data)
 }
 
+// Less implements the sort.Sorter interface.
 func (p LinkerSort) Less(i, j int) bool {
 	weightI := p.reference.Weight(p.data[i])
 	weightJ := p.reference.Weight(p.data[j])
@@ -22,6 +25,7 @@ func (p LinkerSort) Less(i, j int) bool {
 	return math.Min(weightI[0], weightI[1]) < math.Min(weightJ[0], weightJ[1])
 }
 
+// Swap implements the sort.Sorter interface.
 func (p *LinkerSort) Swap(i, j int) {
 	p.data[i], p.data[j] = p.data[j], p.data[i]
 }
@@ -51,6 +55,7 @@ func nextEntity(entities []Linker, from Linker, filter func(from Linker, to Link
 	return nil, sorter.data, 0
 }
 
+// SortEntities sorts a set of linkers.
 func SortEntities(entities []Linker, from *Coordinates, filter func(from Linker, to Linker) bool) ([]Linker, []Linker) {
 	var (
 		end    *Coordinates

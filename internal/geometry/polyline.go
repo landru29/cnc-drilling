@@ -6,6 +6,7 @@ import (
 	"github.com/yofu/dxf/entity"
 )
 
+// NewPathFromPolyline is a builder.
 func NewPathFromPolyline(name string, polyline *entity.Polyline) *Path {
 	if polyline == nil || len(polyline.Vertices) < 2 {
 		return nil
@@ -47,6 +48,7 @@ func NewPathFromPolyline(name string, polyline *entity.Polyline) *Path {
 	return &output
 }
 
+// NewPathFromLightPolyline is a builder.
 func NewPathFromLightPolyline(name string, polyline *entity.LwPolyline) *Path {
 	if polyline == nil || len(polyline.Vertices) < 2 {
 		return nil

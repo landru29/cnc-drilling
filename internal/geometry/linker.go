@@ -2,6 +2,7 @@ package geometry
 
 import "github.com/yofu/dxf/entity"
 
+// Linker is a geometry glue.
 type Linker interface {
 	Start() *Coordinates
 	End() *Coordinates
@@ -10,6 +11,7 @@ type Linker interface {
 	Box() Box
 }
 
+// NewLinker is a builder.
 func NewLinker(name string, dxfEntity entity.Entity) Linker {
 	switch data := dxfEntity.(type) {
 	case *entity.Point:

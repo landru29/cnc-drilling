@@ -7,11 +7,13 @@ import (
 	"github.com/yofu/dxf/entity"
 )
 
+// Point is a 2D point.
 type Point struct {
 	Coordinates
 	Name string
 }
 
+// NewPointFromPoint is a builder.
 func NewPointFromPoint(name string, data *entity.Point) *Point {
 	return &Point{
 		Name:        name,
@@ -19,6 +21,7 @@ func NewPointFromPoint(name string, data *entity.Point) *Point {
 	}
 }
 
+// NewPointFromVertex is a builder.
 func NewPointFromVertex(name string, data *entity.Vertex) Point {
 	return Point{
 		Name:        name,

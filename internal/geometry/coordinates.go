@@ -9,11 +9,13 @@ import (
 	"github.com/yofu/dxf/entity"
 )
 
+// Coordinates is 2D coordinates.
 type Coordinates struct {
 	X float64
 	Y float64
 }
 
+// NewCoordinatesFromPoint is a coordinate builder.
 func NewCoordinatesFromPoint(data *entity.Point) Coordinates {
 	if data == nil {
 		return Coordinates{}
@@ -25,6 +27,7 @@ func NewCoordinatesFromPoint(data *entity.Point) Coordinates {
 	}
 }
 
+// NewCoordinatesFromVertex is a coordinate builder.
 func NewCoordinatesFromVertex(data *entity.Vertex) Coordinates {
 	if data == nil {
 		return Coordinates{}

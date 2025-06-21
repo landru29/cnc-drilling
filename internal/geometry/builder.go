@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// PathsFromDXF builds a set of paths.
 func PathsFromDXF(entities ...dxfConfigurator) []Path {
 	dxfFile := dxf{}
 
@@ -48,6 +49,7 @@ func PathsFromDXF(entities ...dxfConfigurator) []Path {
 	return buildPath(output)
 }
 
+// PointsFromDXFPoints builds a set of points.
 func PointsFromDXFPoints(configs ...dxfConfigurator) []Point {
 	dxfFile := dxf{}
 

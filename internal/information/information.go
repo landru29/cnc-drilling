@@ -20,6 +20,7 @@ type counters struct {
 	vertices       int
 }
 
+// Process is the information reader process.
 func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 	drawing, err := dxf.FromReader(in)
 	if err != nil {
