@@ -5,11 +5,13 @@ import (
 	"io"
 	"os"
 
+	"github.com/landru29/cnc-drilling/internal/configuration"
 	"github.com/landru29/cnc-drilling/internal/information"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 )
 
-func infoCommand(files *[]string, config *information.Config) *cobra.Command {
+func infoCommand(files *[]string, config *configuration.Config) *cobra.Command {
 	return &cobra.Command{
 		Use:   "info <filename.dxf>",
 		Short: "Display informations about DXF",
@@ -31,6 +33,22 @@ func infoCommand(files *[]string, config *information.Config) *cobra.Command {
 			}
 
 			return nil
+		},
+	}
+}
+
+func configFileCommand(config *configuration.Config) *cobra.Command {
+	return &cobra.Command{
+		Use:   "save-config",
+		Short: "save config gile",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			data, err := yaml.Marshal(&config)
+			if err != nil {
+				return err
+			}
+
+			// Sauvegarder dans un fichier
+			return os.WriteFile("config.yaml", data, 0644)
 		},
 	}
 }

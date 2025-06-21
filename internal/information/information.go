@@ -3,22 +3,12 @@ package information
 import (
 	"fmt"
 	"io"
-	"math"
 
+	"github.com/landru29/cnc-drilling/internal/configuration"
 	"github.com/landru29/cnc-drilling/internal/geometry"
 	"github.com/yofu/dxf"
 	"github.com/yofu/dxf/entity"
 )
-
-type Config struct {
-	SpeedMillimeterPerMinute float64
-	SecurityZ                float64
-	Deepness                 float64
-	DeepPerTry               float64
-	Layers                   []string
-	Origin                   OriginDetection
-	Box                      geometry.Box
-}
 
 type counters struct {
 	points         int
@@ -30,7 +20,7 @@ type counters struct {
 	vertices       int
 }
 
-func Process(in io.Reader, out io.Writer, config Config) error {
+func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 	drawing, err := dxf.FromReader(in)
 	if err != nil {
 		return err
@@ -152,31 +142,4 @@ func Process(in io.Reader, out io.Writer, config Config) error {
 	}
 
 	return nil
-}
-
-// TryDeeps is the set of deeps during all tries.
-func (c Config) TryDeeps() []float64 {
-	if c.DeepPerTry <= 0 {
-		return []float64{c.Deepness}
-	}
-
-	output := make([]float64, int(math.Ceil(c.Deepness/c.DeepPerTry)))
-
-	maxFullTry := int(math.Floor(c.Deepness / c.DeepPerTry))
-
-	output[len(output)-1] = math.Mod(c.Deepness, c.DeepPerTry) + float64(maxFullTry)*c.DeepPerTry
-
-	for index := range maxFullTry {
-		output[index] = float64(index+1) * c.DeepPerTry
-	}
-
-	return output
-}
-
-func (c Config) CalcOrigin() []float64 {
-	if c.Origin.Relative {
-		return []float64{c.Origin.Value.X + c.Box.Min.X, c.Origin.Value.Y + c.Box.Min.Y}
-	}
-
-	return []float64{c.Origin.Value.X, c.Origin.Value.Y}
 }

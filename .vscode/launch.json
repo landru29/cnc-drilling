@@ -17,16 +17,29 @@
             ]
         },
         {
-            "name": "Drill",
+            "name": "save",
             "type": "go",
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/cmd",
             "args": [
+                "save-config",
+            ]
+        },
+        {
+            "name": "Drill",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd",
+            "env": {
+                "CNC_FEED": "120"
+            },
+            "args": [
                 "drill",
                 "-d", "10.0",
                 "--deep-per-try", "3",
-                "-f", "320",
+                // "-f", "320",
                 "-o", "@100,100",
                 "../testdata/point01.dxf"
             ]

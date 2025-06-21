@@ -5,12 +5,12 @@ import (
 	"io"
 	"os"
 
+	"github.com/landru29/cnc-drilling/internal/configuration"
 	"github.com/landru29/cnc-drilling/internal/engraver"
-	"github.com/landru29/cnc-drilling/internal/information"
 	"github.com/spf13/cobra"
 )
 
-func engraveCommand(files *[]string, config *information.Config) *cobra.Command {
+func engraveCommand(files *[]string, config *configuration.Config) *cobra.Command {
 	output := &cobra.Command{
 		Use:   "engrave <filename.dxf>",
 		Short: "Generate gcode to engrave from dxf",
@@ -46,8 +46,8 @@ func engraveCommand(files *[]string, config *information.Config) *cobra.Command 
 		},
 	}
 
-	output.Flags().Float64VarP(&config.Deepness, "deep", "d", 1, "engrave deep in millimeters")
-	output.Flags().Float64VarP(&config.DeepPerTry, "deep-per-try", "", 5, "max deep in millimeters during one try")
+	output.Flags().Float64VarP(&config.Deepness, "deep", "d", config.Deepness, "engrave deep in millimeters")
+	output.Flags().Float64VarP(&config.DeepPerTry, "deep-per-try", "", config.DeepPerTry, "max deep in millimeters during one try")
 	output.Flags().VarP(&config.Origin, "origin", "o", "shift origin")
 
 	return output

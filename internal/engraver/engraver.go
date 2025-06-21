@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/landru29/cnc-drilling/internal/configuration"
 	"github.com/landru29/cnc-drilling/internal/gcode"
 	"github.com/landru29/cnc-drilling/internal/geometry"
-	"github.com/landru29/cnc-drilling/internal/information"
 	"github.com/yofu/dxf"
 	"github.com/yofu/dxf/entity"
 )
 
-func Process(in io.Reader, out io.Writer, config information.Config) error {
+func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 	drawing, err := dxf.FromReader(in)
 	if err != nil {
 		return err
@@ -25,15 +25,17 @@ func Process(in io.Reader, out io.Writer, config information.Config) error {
 		return err
 	}
 
+	if _, err := fmt.Fprintf(out, "%s\n", config.BeforeScript); err != nil {
+		return err
+	}
+
 	arcs := []*entity.Arc{}
 	lines := []*entity.Line{}
 	lightPolylines := []*entity.LwPolyline{}
 	polylines := []*entity.Polyline{}
 	circles := []*entity.Circle{}
 
-	var (
-		box *geometry.Box
-	)
+	var shapeBox *geometry.Box
 
 	for _, geometryElement := range geometry.FilterEntities(drawing.Entities(), config.Layers...) {
 		if arc, ok := geometryElement.(*entity.Arc); ok {
@@ -63,18 +65,14 @@ func Process(in io.Reader, out io.Writer, config information.Config) error {
 
 		currentBox := data.Box()
 
-		if box == nil {
-			box = &currentBox
+		if shapeBox == nil {
+			shapeBox = &currentBox
 
 			continue
 		}
 
-		currentBox = currentBox.Merge(*box)
-		box = &currentBox
-	}
-
-	if box != nil {
-		config.Box = *box
+		currentBox = currentBox.Merge(*shapeBox)
+		shapeBox = &currentBox
 	}
 
 	for idx, path := range geometry.PathsFromDXF(
@@ -90,9 +88,9 @@ func Process(in io.Reader, out io.Writer, config information.Config) error {
 			code, err := gcode.Marshal(
 				path,
 				gcode.WithDeep(deep),
-				gcode.WithFeed(config.SpeedMillimeterPerMinute),
+				gcode.WithFeed(config.Feed),
 				gcode.WithSecurityZ(config.SecurityZ),
-				gcode.WithOffset(config.CalcOrigin()),
+				gcode.WithOffset(config.Origin.Computed(shapeBox)),
 			)
 			if err != nil {
 				return err
@@ -111,7 +109,7 @@ func Process(in io.Reader, out io.Writer, config information.Config) error {
 		}
 	}
 
-	if _, err := fmt.Fprintf(out, "G0 X0 Y0\n"); err != nil {
+	if _, err := fmt.Fprintf(out, "%s\n", config.AfterScript); err != nil {
 		return err
 	}
 

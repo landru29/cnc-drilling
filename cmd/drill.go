@@ -5,12 +5,12 @@ import (
 	"io"
 	"os"
 
+	"github.com/landru29/cnc-drilling/internal/configuration"
 	"github.com/landru29/cnc-drilling/internal/driller"
-	"github.com/landru29/cnc-drilling/internal/information"
 	"github.com/spf13/cobra"
 )
 
-func drillCommand(files *[]string, config *information.Config) *cobra.Command {
+func drillCommand(files *[]string, config *configuration.Config) *cobra.Command {
 	output := &cobra.Command{
 		Use:   "drill <filename.dxf>",
 		Short: "Generate gcode to drill from dxf",
@@ -47,8 +47,8 @@ func drillCommand(files *[]string, config *information.Config) *cobra.Command {
 		},
 	}
 
-	output.Flags().Float64VarP(&config.Deepness, "deep", "d", 5, "drilling deep in millimeters")
-	output.Flags().Float64VarP(&config.DeepPerTry, "deep-per-try", "", 5, "max deep in millimeters during one try")
+	output.Flags().Float64VarP(&config.Deepness, "deep", "d", config.Deepness, "drilling deep in millimeters")
+	output.Flags().Float64VarP(&config.DeepPerTry, "deep-per-try", "", config.DeepPerTry, "max deep in millimeters during one try")
 	output.Flags().VarP(&config.Origin, "origin", "o", "shift origin")
 
 	return output

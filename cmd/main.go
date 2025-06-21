@@ -20,7 +20,12 @@ func main() {
 		cancel()
 	}()
 
-	if err := mainCommand().ExecuteContext(ctx); err != nil {
+	mainCmd, err := mainCommand()
+	if err != nil {
+		panic(err)
+	}
+
+	if err := mainCmd.ExecuteContext(ctx); err != nil {
 		panic(err)
 	}
 }
