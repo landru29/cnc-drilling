@@ -48,7 +48,7 @@ func configFileCommand(config *configuration.Config) *cobra.Command {
 			}
 
 			// Sauvegarder dans un fichier
-			return os.WriteFile("config.yaml", data, 0644)
+			return os.WriteFile("drill.yaml", data, 0644)
 		},
 	}
 }

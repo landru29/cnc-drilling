@@ -22,11 +22,11 @@ func mainCommand() (*cobra.Command, error) {
 
 	viperConfiguration := viper.New()
 
-	viperConfiguration.SetConfigName("config")
+	viperConfiguration.SetConfigName("drill")
 	viperConfiguration.SetConfigType("yaml")
 	viperConfiguration.AddConfigPath(".")
-	viperConfiguration.AddConfigPath("$HOME/.cnc-drilling")
-	viperConfiguration.AddConfigPath("/etc/cnc-drilling/")
+	viperConfiguration.AddConfigPath("$HOME/.cnc")
+	viperConfiguration.AddConfigPath("/etc/cnc/")
 	viperConfiguration.SetEnvPrefix("CNC")
 	viperConfiguration.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viperConfiguration.AutomaticEnv()
