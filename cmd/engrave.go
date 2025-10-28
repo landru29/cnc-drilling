@@ -47,6 +47,7 @@ func engraveCommand(files *[]string, config *configuration.Config) *cobra.Comman
 	}
 
 	output.Flags().Float64VarP(&config.Deepness, "deep", "d", config.Deepness, "engrave deep in millimeters")
+	output.Flags().Float64VarP(&config.DeepStart, "deep-start", "", config.DeepStart, "initial deep in millimeters")
 	output.Flags().Float64VarP(&config.DeepPerTry, "deep-per-try", "", config.DeepPerTry, "max deep in millimeters during one try")
 	output.Flags().VarP(&config.Origin, "origin", "o", "shift origin")
 

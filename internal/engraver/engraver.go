@@ -76,16 +76,17 @@ func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 		shapeBox = &currentBox
 	}
 
-	for idx, path := range geometry.PathsFromDXF(
-		geometry.WithDXFLines(lines...),
-		geometry.WithDXFArcs(arcs...),
-		geometry.WithDXFLwPolyline(lightPolylines...),
-		geometry.WithDXFPolyline(polylines...),
-		geometry.WithDXFCircle(circles...),
-	) {
-		tryDeeps := config.TryDeeps()
+	tryDeeps := config.TryDeeps()
 
-		for deepIndex, deep := range tryDeeps {
+	for deepIndex, deep := range tryDeeps {
+
+		for idx, path := range geometry.PathsFromDXF(
+			geometry.WithDXFLines(lines...),
+			geometry.WithDXFArcs(arcs...),
+			geometry.WithDXFLwPolyline(lightPolylines...),
+			geometry.WithDXFPolyline(polylines...),
+			geometry.WithDXFCircle(circles...),
+		) {
 			code, err := gcode.Marshal(
 				path,
 				gcode.WithDeep(deep),

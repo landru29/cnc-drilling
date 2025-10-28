@@ -55,10 +55,12 @@ func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 		}
 	}
 
-	for idx, point := range geometry.PointsFromDXFPoints(geometry.WithDXFPoints(setOfPoints...)) {
-		tryDeeps := config.TryDeeps()
+	tryDeeps := config.TryDeeps()
 
-		for deepIndex, deep := range tryDeeps {
+	for deepIndex, deep := range tryDeeps {
+
+		for idx, point := range geometry.PointsFromDXFPoints(geometry.WithDXFPoints(setOfPoints...)) {
+
 			code, err := gcode.Marshal(
 				point,
 				gcode.WithDeep(deep),
