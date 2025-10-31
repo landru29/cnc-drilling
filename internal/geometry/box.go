@@ -3,6 +3,8 @@ package geometry
 import (
 	"fmt"
 	"math"
+	"regexp"
+	"strings"
 )
 
 // Box is the cutting box.
@@ -40,4 +42,28 @@ func (b Box) String() string {
 		b.Max.X,
 		b.Max.Y,
 	)
+}
+
+func (a *Box) Set(value string) error {
+	cleanedValue := strings.ReplaceAll(value, " ", "")
+
+	re := regexp.MustCompile(`\[\(([+-]?\d*(\.\d+)?),([+-]?\d*(\.\d+)?)\),\(([+-]?\d*(\.\d+)?),([+-]?\d*(\.\d+)?)\)\]`)
+	if !re.MatchString(cleanedValue) {
+		return fmt.Errorf("invalid box format: [(minX,minY),(maxX,maxY)]")
+	}
+
+	var x1, x2, y1, y2 float64
+
+	if _, err := fmt.Sscanf(cleanedValue, "[(%f,%f),(%f,%f)]",
+		&x1, &y1, &x2, &y2); err != nil {
+		return err
+	}
+
+	a.Min = Coordinates{X: math.Min(x1, x2), Y: math.Min(y1, y2)}
+	a.Max = Coordinates{X: math.Max(x1, x2), Y: math.Max(y1, y2)}
+	return nil
+}
+
+func (a Box) Type() string {
+	return "box"
 }

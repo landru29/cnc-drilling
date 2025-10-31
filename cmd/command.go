@@ -73,6 +73,7 @@ func mainCommand() (*cobra.Command, error) {
 		engraveCommand(&files, &config),
 		infoCommand(&files, &config),
 		configFileCommand(&config),
+		surfaceCommand(&config),
 	)
 
 	return output, nil
