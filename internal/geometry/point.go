@@ -2,6 +2,7 @@ package geometry
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/landru29/cnc-drilling/internal/gcode"
 	"github.com/yofu/dxf/entity"
@@ -11,6 +12,13 @@ import (
 type Point struct {
 	Coordinates
 	Name string
+}
+
+// DistanceTo computes the distance to another point.
+func (p Point) DistanceTo(other Point) float64 {
+	dx := other.X - p.X
+	dy := other.Y - p.Y
+	return math.Sqrt(dx*dx + dy*dy)
 }
 
 // NewPointFromPoint is a builder.
