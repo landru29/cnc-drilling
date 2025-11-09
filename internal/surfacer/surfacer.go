@@ -3,13 +3,14 @@ package surfacer
 import (
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/landru29/cnc-drilling/internal/configuration"
 	"github.com/landru29/cnc-drilling/internal/geometry"
 )
 
 // Process is the surfacing process.
-func Process(box geometry.Box, step float64, out io.Writer, config configuration.Config, method Method) error {
+func Process(box geometry.Box, step float64, out io.Writer, info io.Writer, config configuration.Config, method Method) error {
 	if _, err := fmt.Fprintf(out, "G90\nG21\nG0 Z%.01f\n", config.SecurityZ); err != nil {
 		return err
 	}
@@ -19,6 +20,8 @@ func Process(box geometry.Box, step float64, out io.Writer, config configuration
 	}
 
 	tryDeeps := config.TryDeeps()
+
+	var distance float64 = 0
 
 	for deepIndex, deep := range tryDeeps {
 		if _, err := fmt.Fprintf(
@@ -32,23 +35,23 @@ func Process(box geometry.Box, step float64, out io.Writer, config configuration
 
 		switch method {
 		case MethodZigzag:
-			if err := surfaceAreaZigzag(box, step, out, config, deep); err != nil {
+			if err := surfaceAreaZigzag(box, step, out, config, deep, &distance); err != nil {
 				return err
 			}
 		case MethodSpiral:
-			if err := surfaceAreaSpiral(box, step, out, config, deep, true); err != nil {
+			if err := surfaceAreaSpiral(box, step, out, config, deep, true, &distance); err != nil {
 				return err
 			}
 		case MethodSpiralInverted:
-			if err := surfaceAreaSpiral(box, step, out, config, deep, false); err != nil {
+			if err := surfaceAreaSpiral(box, step, out, config, deep, false, &distance); err != nil {
 				return err
 			}
 		case MethodSpiralFromCenter:
-			if err := surfaceAreaSpiralFromCenter(box, step, out, config, deep, true); err != nil {
+			if err := surfaceAreaSpiralFromCenter(box, step, out, config, deep, true, &distance); err != nil {
 				return err
 			}
 		case MethodSpiralFromCenterInverted:
-			if err := surfaceAreaSpiralFromCenter(box, step, out, config, deep, false); err != nil {
+			if err := surfaceAreaSpiralFromCenter(box, step, out, config, deep, false, &distance); err != nil {
 				return err
 			}
 		}
@@ -62,13 +65,28 @@ func Process(box geometry.Box, step float64, out io.Writer, config configuration
 		return err
 	}
 
+	duration := time.Duration(float64(time.Minute) * (distance / config.Feed))
+
+	if _, err := fmt.Fprintf(info, "; Total distance: %.01f mm\n; Total time: %s\n", distance, duration.Round(time.Second).String()); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func surfaceAreaZigzag(box geometry.Box, step float64, out io.Writer, config configuration.Config, deep float64) error {
+func surfaceAreaZigzag(
+	box geometry.Box,
+	step float64,
+	out io.Writer,
+	config configuration.Config,
+	deep float64,
+	distance *float64,
+) error {
 	if _, err := fmt.Fprintf(out, "G0 Z%.01f\n", config.SecurityZ); err != nil {
 		return err
 	}
+
+	currentPosition := geometry.Coordinates{X: box.Min.X, Y: box.Min.Y}
 
 	if _, err := fmt.Fprintf(out, "G0 X%.01f Y%.01f\n", box.Min.X, box.Min.Y); err != nil {
 		return err
@@ -84,14 +102,18 @@ func surfaceAreaZigzag(box geometry.Box, step float64, out io.Writer, config con
 			return err
 		}
 
+		*distance += translateTo(&currentPosition, geometry.Coordinates{X: currentPosition.X, Y: y})
+
 		if positiveX {
 			if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", box.Max.X, y, config.Feed); err != nil {
 				return err
 			}
+			*distance += translateTo(&currentPosition, geometry.Coordinates{X: box.Max.X, Y: y})
 		} else {
 			if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", box.Min.X, y, config.Feed); err != nil {
 				return err
 			}
+			*distance += translateTo(&currentPosition, geometry.Coordinates{X: box.Min.X, Y: y})
 		}
 
 		positiveX = !positiveX
@@ -100,7 +122,15 @@ func surfaceAreaZigzag(box geometry.Box, step float64, out io.Writer, config con
 	return nil
 }
 
-func surfaceAreaSpiral(box geometry.Box, step float64, out io.Writer, config configuration.Config, deep float64, clockwise bool) error {
+func surfaceAreaSpiral(
+	box geometry.Box,
+	step float64,
+	out io.Writer,
+	config configuration.Config,
+	deep float64,
+	clockwise bool,
+	distance *float64,
+) error {
 	if _, err := fmt.Fprintf(out, "G0 Z%.01f\n", config.SecurityZ); err != nil {
 		return err
 	}
@@ -108,6 +138,8 @@ func surfaceAreaSpiral(box geometry.Box, step float64, out io.Writer, config con
 	if _, err := fmt.Fprintf(out, "G0 X%.01f Y%.01f\n", box.Min.X, box.Min.Y); err != nil {
 		return err
 	}
+
+	currentPosition := geometry.Coordinates{X: box.Min.X, Y: box.Min.Y}
 
 	if _, err := fmt.Fprintf(out, "G1 Z-%.01f F%.01f\n", deep, config.Feed); err != nil {
 		return err
@@ -124,12 +156,14 @@ func surfaceAreaSpiral(box geometry.Box, step float64, out io.Writer, config con
 			if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", maxX, minY, config.Feed); err != nil {
 				return err
 			}
+			*distance += translateTo(&currentPosition, geometry.Coordinates{X: maxX, Y: minY})
 			minY += step
 
 			// Move down
 			if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", maxX, maxY, config.Feed); err != nil {
 				return err
 			}
+			*distance += translateTo(&currentPosition, geometry.Coordinates{X: maxX, Y: maxY})
 			maxX -= step
 
 			// Move left
@@ -137,6 +171,7 @@ func surfaceAreaSpiral(box geometry.Box, step float64, out io.Writer, config con
 				if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", minX, maxY, config.Feed); err != nil {
 					return err
 				}
+				*distance += translateTo(&currentPosition, geometry.Coordinates{X: minX, Y: maxY})
 				maxY -= step
 			}
 
@@ -145,6 +180,7 @@ func surfaceAreaSpiral(box geometry.Box, step float64, out io.Writer, config con
 				if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", minX, minY, config.Feed); err != nil {
 					return err
 				}
+				*distance += translateTo(&currentPosition, geometry.Coordinates{X: minX, Y: minY})
 				minX += step
 			}
 		} else {
@@ -152,12 +188,14 @@ func surfaceAreaSpiral(box geometry.Box, step float64, out io.Writer, config con
 			if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", minX, minY, config.Feed); err != nil {
 				return err
 			}
+			*distance += translateTo(&currentPosition, geometry.Coordinates{X: minX, Y: minY})
 			minY += step
 
 			// Move down
 			if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", minX, maxY, config.Feed); err != nil {
 				return err
 			}
+			*distance += translateTo(&currentPosition, geometry.Coordinates{X: minX, Y: maxY})
 			maxX -= step
 
 			// Move right
@@ -165,6 +203,7 @@ func surfaceAreaSpiral(box geometry.Box, step float64, out io.Writer, config con
 				if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", maxX, maxY, config.Feed); err != nil {
 					return err
 				}
+				*distance += translateTo(&currentPosition, geometry.Coordinates{X: maxX, Y: maxY})
 				maxY -= step
 			}
 
@@ -173,6 +212,7 @@ func surfaceAreaSpiral(box geometry.Box, step float64, out io.Writer, config con
 				if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", maxX, minY, config.Feed); err != nil {
 					return err
 				}
+				*distance += translateTo(&currentPosition, geometry.Coordinates{X: maxX, Y: minY})
 				minX += step
 			}
 		}
@@ -181,7 +221,15 @@ func surfaceAreaSpiral(box geometry.Box, step float64, out io.Writer, config con
 	return nil
 }
 
-func surfaceAreaSpiralFromCenter(box geometry.Box, step float64, out io.Writer, config configuration.Config, deep float64, clockwise bool) error {
+func surfaceAreaSpiralFromCenter(
+	box geometry.Box,
+	step float64,
+	out io.Writer,
+	config configuration.Config,
+	deep float64,
+	clockwise bool,
+	distance *float64,
+) error {
 	if _, err := fmt.Fprintf(out, "G0 Z%.01f\n", config.SecurityZ); err != nil {
 		return err
 	}
@@ -192,6 +240,8 @@ func surfaceAreaSpiralFromCenter(box geometry.Box, step float64, out io.Writer, 
 	if _, err := fmt.Fprintf(out, "G0 X%.01f Y%.01f\n", centerX, centerY); err != nil {
 		return err
 	}
+
+	currentPosition := geometry.Coordinates{X: centerX, Y: centerY}
 
 	if _, err := fmt.Fprintf(out, "G1 Z-%.01f F%.01f\n", deep, config.Feed); err != nil {
 		return err
@@ -222,41 +272,49 @@ func surfaceAreaSpiralFromCenter(box geometry.Box, step float64, out io.Writer, 
 			if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", maxX, minY, config.Feed); err != nil {
 				return err
 			}
+			*distance += translateTo(&currentPosition, geometry.Coordinates{X: maxX, Y: minY})
 
 			// Move down
 			if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", maxX, maxY, config.Feed); err != nil {
 				return err
 			}
+			*distance += translateTo(&currentPosition, geometry.Coordinates{X: maxX, Y: maxY})
 
 			// Move left
 			if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", minX, maxY, config.Feed); err != nil {
 				return err
 			}
+			*distance += translateTo(&currentPosition, geometry.Coordinates{X: minX, Y: maxY})
 
 			// Move up
 			if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", minX, minY, config.Feed); err != nil {
 				return err
 			}
+			*distance += translateTo(&currentPosition, geometry.Coordinates{X: minX, Y: minY})
 		} else {
 			// Move left
 			if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", minX, minY, config.Feed); err != nil {
 				return err
 			}
+			*distance += translateTo(&currentPosition, geometry.Coordinates{X: minX, Y: minY})
 
 			// Move down
 			if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", minX, maxY, config.Feed); err != nil {
 				return err
 			}
+			*distance += translateTo(&currentPosition, geometry.Coordinates{X: minX, Y: maxY})
 
 			// Move right
 			if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", maxX, maxY, config.Feed); err != nil {
 				return err
 			}
+			*distance += translateTo(&currentPosition, geometry.Coordinates{X: maxX, Y: maxY})
 
 			// Move up
 			if _, err := fmt.Fprintf(out, "G1 X%.01f Y%.01f F%.01f\n", maxX, minY, config.Feed); err != nil {
 				return err
 			}
+			*distance += translateTo(&currentPosition, geometry.Coordinates{X: maxX, Y: minY})
 		}
 	}
 

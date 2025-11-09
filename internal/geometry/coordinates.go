@@ -3,6 +3,7 @@ package geometry
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -13,6 +14,12 @@ import (
 type Coordinates struct {
 	X float64
 	Y float64
+}
+
+func (c Coordinates) DistanceTo(other Coordinates) float64 {
+	dx := c.X - other.X
+	dy := c.Y - other.Y
+	return math.Sqrt(dx*dx + dy*dy)
 }
 
 // NewCoordinatesFromPoint is a coordinate builder.

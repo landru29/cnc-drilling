@@ -18,7 +18,7 @@ func surfaceCommand(config *configuration.Config) *cobra.Command {
 		Use:   "surface",
 		Short: "Generate gcode to surface a rectangle area",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return surfacer.Process(surface, step, cmd.OutOrStdout(), *config, method)
+			return surfacer.Process(surface, step, cmd.OutOrStdout(), cmd.OutOrStderr(), *config, method)
 		},
 	}
 
