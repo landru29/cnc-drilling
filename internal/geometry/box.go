@@ -64,6 +64,17 @@ func (a *Box) Set(value string) error {
 	return nil
 }
 
+// Type returns the type of the shape.
 func (a Box) Type() string {
 	return "box"
+}
+
+// Height returns the height of the box.
+func (a Box) Height() float64 {
+	return a.Max.Y - a.Min.Y
+}
+
+// Width returns the width of the box.
+func (a Box) Width() float64 {
+	return a.Max.X - a.Min.X
 }

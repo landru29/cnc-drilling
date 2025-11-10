@@ -107,5 +107,20 @@
                 "../testdata/arc.dxf"
             ]
         },
+
+        {
+            "name": "Surface",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd",
+            "args": [
+                "surface",
+                "-a", "[(0,0),(200, 223)]",
+                "-d", "5.0",
+                "--deep-per-try", "1",
+                "-m", "spiral-from-center",
+            ]
+        },
     ]
 }
