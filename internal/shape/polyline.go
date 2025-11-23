@@ -1,8 +1,9 @@
-package geometry
+package shape
 
 import (
 	"fmt"
 
+	"github.com/landru29/cnc-drilling/internal/geometry"
 	"github.com/yofu/dxf/entity"
 )
 
@@ -21,9 +22,9 @@ func NewPathFromPolyline(name string, polyline *entity.Polyline) *Path {
 		if center != nil && ray != 0 {
 			output[idx] = &Curve{
 				Name:       fmt.Sprintf("%s #%d / Layer %s", name, idx, polyline.Layer().Name()),
-				StartPoint: NewCoordinatesFromVertex(currentVertex),
-				EndPoint:   NewCoordinatesFromVertex(vertex),
-				Center: Coordinates{
+				StartPoint: geometry.NewCoordinatesFromVertex(currentVertex),
+				EndPoint:   geometry.NewCoordinatesFromVertex(vertex),
+				Center: geometry.Coordinates{
 					X: center[0],
 					Y: center[1],
 				},
@@ -38,8 +39,8 @@ func NewPathFromPolyline(name string, polyline *entity.Polyline) *Path {
 
 		output[idx] = &Segment{
 			Name:       fmt.Sprintf("%s #%d", name, idx),
-			StartPoint: NewCoordinatesFromVertex(currentVertex),
-			EndPoint:   NewCoordinatesFromVertex(vertex),
+			StartPoint: geometry.NewCoordinatesFromVertex(currentVertex),
+			EndPoint:   geometry.NewCoordinatesFromVertex(vertex),
 		}
 
 		currentVertex = vertex
@@ -62,15 +63,15 @@ func NewPathFromLightPolyline(name string, polyline *entity.LwPolyline) *Path {
 		if center != nil && ray != 0 {
 			output[idx] = &Curve{
 				Name: fmt.Sprintf("%s #%d / Layer %s", name, idx, polyline.Layer().Name()),
-				StartPoint: Coordinates{
+				StartPoint: geometry.Coordinates{
 					X: currentVertex[0],
 					Y: currentVertex[1],
 				},
-				EndPoint: Coordinates{
+				EndPoint: geometry.Coordinates{
 					X: vertex[0],
 					Y: vertex[1],
 				},
-				Center: Coordinates{
+				Center: geometry.Coordinates{
 					X: center[0],
 					Y: center[1],
 				},
@@ -85,11 +86,11 @@ func NewPathFromLightPolyline(name string, polyline *entity.LwPolyline) *Path {
 
 		output[idx] = &Segment{
 			Name: fmt.Sprintf("%s #%d", name, idx),
-			StartPoint: Coordinates{
+			StartPoint: geometry.Coordinates{
 				X: currentVertex[0],
 				Y: currentVertex[1],
 			},
-			EndPoint: Coordinates{
+			EndPoint: geometry.Coordinates{
 				X: vertex[0],
 				Y: vertex[1],
 			},

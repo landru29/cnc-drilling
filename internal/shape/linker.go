@@ -1,14 +1,17 @@
-package geometry
+package shape
 
-import "github.com/yofu/dxf/entity"
+import (
+	"github.com/landru29/cnc-drilling/internal/geometry"
+	"github.com/yofu/dxf/entity"
+)
 
 // Linker is a geometry glue.
 type Linker interface {
-	Start() *Coordinates
-	End() *Coordinates
+	Start() *geometry.Coordinates
+	End() *geometry.Coordinates
 	Revert()
 	Weight(Linker) [2]float64
-	Box() Box
+	Box() geometry.Box
 }
 
 // NewLinker is a builder.

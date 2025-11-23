@@ -1,4 +1,4 @@
-package engraver
+package pather
 
 import (
 	"fmt"
@@ -7,6 +7,8 @@ import (
 	"github.com/landru29/cnc-drilling/internal/configuration"
 	"github.com/landru29/cnc-drilling/internal/gcode"
 	"github.com/landru29/cnc-drilling/internal/geometry"
+	"github.com/landru29/cnc-drilling/internal/machine"
+	"github.com/landru29/cnc-drilling/internal/shape"
 	"github.com/yofu/dxf"
 	"github.com/yofu/dxf/entity"
 )
@@ -30,6 +32,8 @@ func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 		return err
 	}
 
+	state := machine.NewPath(0, 0, 0)
+
 	arcs := []*entity.Arc{}
 	lines := []*entity.Line{}
 	lightPolylines := []*entity.LwPolyline{}
@@ -38,7 +42,7 @@ func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 
 	var shapeBox *geometry.Box
 
-	for _, geometryElement := range geometry.FilterEntities(drawing.Entities(), config.Layers...) {
+	for _, geometryElement := range shape.FilterEntities(drawing.Entities(), config.Layers...) {
 		if arc, ok := geometryElement.(*entity.Arc); ok {
 			arcs = append(arcs, arc)
 		}
@@ -59,7 +63,7 @@ func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 			circles = append(circles, circle)
 		}
 
-		data := geometry.NewLinker("", geometryElement)
+		data := shape.NewLinker("", geometryElement)
 		if data == nil {
 			continue
 		}
@@ -80,14 +84,15 @@ func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 
 	for deepIndex, deep := range tryDeeps {
 
-		for idx, path := range geometry.PathsFromDXF(
-			geometry.WithDXFLines(lines...),
-			geometry.WithDXFArcs(arcs...),
-			geometry.WithDXFLwPolyline(lightPolylines...),
-			geometry.WithDXFPolyline(polylines...),
-			geometry.WithDXFCircle(circles...),
+		for idx, path := range shape.PathsFromDXF(
+			shape.WithDXFLines(lines...),
+			shape.WithDXFArcs(arcs...),
+			shape.WithDXFLwPolyline(lightPolylines...),
+			shape.WithDXFPolyline(polylines...),
+			shape.WithDXFCircle(circles...),
 		) {
 			code, err := gcode.Marshal(
+				state,
 				path,
 				gcode.WithDeep(deep),
 				gcode.WithFeed(config.Feed),
@@ -111,7 +116,7 @@ func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 		}
 	}
 
-	if _, err := fmt.Fprintf(out, "%s\n", config.AfterScript); err != nil {
+	if _, err := fmt.Fprintf(out, "%s\n%s\n", config.AfterScript, state.String()); err != nil {
 		return err
 	}
 

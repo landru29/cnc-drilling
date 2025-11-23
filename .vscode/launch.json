@@ -51,7 +51,7 @@
             "mode": "auto",
             "program": "${workspaceFolder}/cmd",
             "args": [
-                "engrave",
+                "path",
                 "-d", "10.0",
                 "--deep-per-try", "3",
                 "-o", "@-10,-10",
@@ -66,7 +66,7 @@
             "mode": "auto",
             "program": "${workspaceFolder}/cmd",
             "args": [
-                "engrave",
+                "path",
                 "-d", "10.0",
                 "--deep-per-try", "3",
                 "../testdata/rectangle.dxf"
@@ -79,7 +79,7 @@
             "mode": "auto",
             "program": "${workspaceFolder}/cmd",
             "args": [
-                "engrave",
+                "path",
                 "-d", "10.0",
                 "--deep-per-try", "5",
                 "../testdata/point01.dxf"
@@ -92,7 +92,7 @@
             "mode": "auto",
             "program": "${workspaceFolder}/cmd",
             "args": [
-                "engrave",
+                "path",
                 "../testdata/polyline.dxf"
             ]
         },
@@ -103,7 +103,7 @@
             "mode": "auto",
             "program": "${workspaceFolder}/cmd",
             "args": [
-                "engrave",
+                "path",
                 "../testdata/arc.dxf"
             ]
         },
@@ -116,10 +116,12 @@
             "program": "${workspaceFolder}/cmd",
             "args": [
                 "surface",
-                "-a", "[(0,0),(200, 223)]",
-                "-d", "5.0",
+                "-a", "[(0,0),(155, 25)]",
+                "-d", "1.0",
+                "-s", "2",
                 "--deep-per-try", "1",
                 "-m", "spiral-from-center",
+                "-f", "300"
             ]
         },
     ]

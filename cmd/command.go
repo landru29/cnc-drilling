@@ -70,7 +70,7 @@ func mainCommand() (*cobra.Command, error) {
 
 	output.AddCommand(
 		drillCommand(&files, &config),
-		engraveCommand(&files, &config),
+		pathCommand(&files, &config),
 		infoCommand(&files, &config),
 		configFileCommand(&config),
 		surfaceCommand(&config),

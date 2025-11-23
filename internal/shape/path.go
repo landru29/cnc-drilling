@@ -1,9 +1,11 @@
-package geometry
+package shape
 
 import (
 	"fmt"
 
 	"github.com/landru29/cnc-drilling/internal/gcode"
+	"github.com/landru29/cnc-drilling/internal/geometry"
+	"github.com/landru29/cnc-drilling/internal/machine"
 	"github.com/yofu/dxf/entity"
 )
 
@@ -15,32 +17,32 @@ func NewPathFromCircle(name string, data *entity.Circle) *Path {
 	return &Path{
 		&Curve{
 			Name: fmt.Sprintf("%s (1/2)", name),
-			Center: Coordinates{
+			Center: geometry.Coordinates{
 				X: data.Center[0],
 				Y: data.Center[1],
 			},
 			Radius: data.Radius,
-			StartPoint: Coordinates{
+			StartPoint: geometry.Coordinates{
 				X: data.Center[0] + data.Radius,
 				Y: data.Center[1],
 			},
-			EndPoint: Coordinates{
+			EndPoint: geometry.Coordinates{
 				X: data.Center[0] - data.Radius,
 				Y: data.Center[1],
 			},
 		},
 		&Curve{
 			Name: fmt.Sprintf("%s (2/2)", name),
-			Center: Coordinates{
+			Center: geometry.Coordinates{
 				X: data.Center[0],
 				Y: data.Center[1],
 			},
 			Radius: data.Radius,
-			StartPoint: Coordinates{
+			StartPoint: geometry.Coordinates{
 				X: data.Center[0] - data.Radius,
 				Y: data.Center[1],
 			},
-			EndPoint: Coordinates{
+			EndPoint: geometry.Coordinates{
 				X: data.Center[0] + data.Radius,
 				Y: data.Center[1],
 			},
@@ -49,7 +51,7 @@ func NewPathFromCircle(name string, data *entity.Circle) *Path {
 }
 
 // MarshallGCode implements the Marshaler interface.
-func (p Path) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
+func (p Path) MarshallGCode(state *machine.Path, configs ...gcode.Configurator) ([]byte, error) {
 	var output string
 
 	options := gcode.Options{}
@@ -71,7 +73,7 @@ func (p Path) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 	for _, segmentOrCurve := range p {
 		localConf := append([]gcode.Configurator{gcode.WithoutStart(), gcode.WithoutEnd()}, configs...)
 
-		out, err := gcode.Marshal(segmentOrCurve, localConf...)
+		out, err := gcode.Marshal(state, segmentOrCurve, localConf...)
 		if err != nil {
 			return nil, err
 		}
@@ -87,7 +89,7 @@ func (p Path) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 }
 
 // Start implements the Linker interface.
-func (p Path) Start() *Coordinates {
+func (p Path) Start() *geometry.Coordinates {
 	if len(p) == 0 {
 		return nil
 	}
@@ -96,7 +98,7 @@ func (p Path) Start() *Coordinates {
 }
 
 // End implements the Linker interface.
-func (p Path) End() *Coordinates {
+func (p Path) End() *geometry.Coordinates {
 	if len(p) == 0 {
 		return nil
 	}
@@ -116,9 +118,9 @@ func (p Path) Revert() {
 }
 
 // Box implements the Linker interface.
-func (p Path) Box() Box {
+func (p Path) Box() geometry.Box {
 	if len(p) == 0 {
-		return Box{}
+		return geometry.Box{}
 	}
 
 	output := p[0].Box()

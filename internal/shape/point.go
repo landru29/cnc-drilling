@@ -1,16 +1,18 @@
-package geometry
+package shape
 
 import (
 	"fmt"
 	"math"
 
 	"github.com/landru29/cnc-drilling/internal/gcode"
+	"github.com/landru29/cnc-drilling/internal/geometry"
+	"github.com/landru29/cnc-drilling/internal/machine"
 	"github.com/yofu/dxf/entity"
 )
 
 // Point is a 2D point.
 type Point struct {
-	Coordinates
+	geometry.Coordinates
 	Name string
 }
 
@@ -25,7 +27,7 @@ func (p Point) DistanceTo(other Point) float64 {
 func NewPointFromPoint(name string, data *entity.Point) *Point {
 	return &Point{
 		Name:        name,
-		Coordinates: NewCoordinatesFromPoint(data),
+		Coordinates: geometry.NewCoordinatesFromPoint(data),
 	}
 }
 
@@ -33,12 +35,12 @@ func NewPointFromPoint(name string, data *entity.Point) *Point {
 func NewPointFromVertex(name string, data *entity.Vertex) Point {
 	return Point{
 		Name:        name,
-		Coordinates: NewCoordinatesFromVertex(data),
+		Coordinates: geometry.NewCoordinatesFromVertex(data),
 	}
 }
 
 // MarshallGCode implements the Marshaler interface.
-func (p Point) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
+func (p Point) MarshallGCode(state *machine.Path, configs ...gcode.Configurator) ([]byte, error) {
 	options := gcode.Options{}
 	for _, config := range configs {
 		config(&options)
@@ -52,4 +54,20 @@ func (p Point) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
 		options.Feed,
 		options.SecurityZ,
 	)), nil
+}
+
+// Weight implements the Linker interface.
+func (p Point) Weight(other Linker) [2]float64 {
+	output := [2]float64{0, 0}
+
+	if start := other.Start(); start != nil {
+		output[0] = p.Coordinates.Weight(*start)
+	}
+
+	if end := other.End(); end != nil {
+		output[1] = p.Coordinates.Weight(*end)
+	}
+
+	return output
+
 }

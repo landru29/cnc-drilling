@@ -26,6 +26,11 @@ func NewPath(x float64, y float64, z float64) *Path {
 	}
 }
 
+// String implements the fmt.Stringer interface.
+func (p Path) String() string {
+	return fmt.Sprintf(";-- Path summary --\n; Distance: %.3f mm\n; Duration: %s\n", p.Distance, p.Duration.String())
+}
+
 func duration(distance float64, feed float64) time.Duration {
 	return time.Duration((distance * float64(time.Minute)) / feed)
 }

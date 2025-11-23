@@ -241,13 +241,13 @@ func surfaceAreaSpiralFromCenter(
 	diff := box.Width() - box.Height()
 	if diff > 0 {
 		schema = geometry.Box{
-			Min: geometry.Coordinates{X: (box.Min.X+box.Max.X)/2 - diff/2, Y: (box.Min.Y + box.Max.Y) / 2},
-			Max: geometry.Coordinates{X: (box.Min.X+box.Max.X)/2 + diff/2, Y: (box.Min.Y + box.Max.Y) / 2},
+			Min: geometry.Coordinates{X: (box.Min.X+box.Max.X)/2 - diff/2, Y: (box.Min.Y + box.Max.Y - step) / 2},
+			Max: geometry.Coordinates{X: (box.Min.X+box.Max.X)/2 + diff/2, Y: (box.Min.Y + box.Max.Y*+step) / 2},
 		}
 	} else {
 		schema = geometry.Box{
-			Min: geometry.Coordinates{X: (box.Min.X + box.Max.X) / 2, Y: (box.Min.Y+box.Max.Y)/2 + diff/2},
-			Max: geometry.Coordinates{X: (box.Min.X + box.Max.X) / 2, Y: (box.Min.Y+box.Max.Y)/2 - diff/2},
+			Min: geometry.Coordinates{X: (box.Min.X + box.Max.X - step) / 2, Y: (box.Min.Y+box.Max.Y)/2 + diff/2},
+			Max: geometry.Coordinates{X: (box.Min.X + box.Max.X + step) / 2, Y: (box.Min.Y+box.Max.Y)/2 - diff/2},
 		}
 	}
 

@@ -6,14 +6,14 @@ import (
 	"os"
 
 	"github.com/landru29/cnc-drilling/internal/configuration"
-	"github.com/landru29/cnc-drilling/internal/engraver"
+	"github.com/landru29/cnc-drilling/internal/pather"
 	"github.com/spf13/cobra"
 )
 
-func engraveCommand(files *[]string, config *configuration.Config) *cobra.Command {
+func pathCommand(files *[]string, config *configuration.Config) *cobra.Command {
 	output := &cobra.Command{
-		Use:   "engrave <filename.dxf>",
-		Short: "Generate gcode to engrave from dxf",
+		Use:   "path <filename.dxf>",
+		Short: "Generate gcode to follow a path from dxf",
 		Args:  cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			for _, file := range *files {
@@ -30,7 +30,7 @@ func engraveCommand(files *[]string, config *configuration.Config) *cobra.Comman
 					return err
 				}
 
-				if err := engraver.Process(
+				if err := pather.Process(
 					fileDesc, cmd.OutOrStdout(),
 					*config,
 				); err != nil {

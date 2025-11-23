@@ -1,19 +1,21 @@
-package geometry
+package shape
 
 import (
 	"fmt"
 	"math"
 
 	"github.com/landru29/cnc-drilling/internal/gcode"
+	"github.com/landru29/cnc-drilling/internal/geometry"
+	"github.com/landru29/cnc-drilling/internal/machine"
 	"github.com/yofu/dxf/entity"
 )
 
 // Curve is a curved segment.
 type Curve struct {
 	Name       string
-	StartPoint Coordinates
-	EndPoint   Coordinates
-	Center     Coordinates
+	StartPoint geometry.Coordinates
+	EndPoint   geometry.Coordinates
+	Center     geometry.Coordinates
 	Radius     float64
 	Clockwise  bool
 }
@@ -22,15 +24,15 @@ type Curve struct {
 func NewCurveFromArc(name string, data *entity.Arc) *Curve {
 	return &Curve{
 		Name: name,
-		Center: Coordinates{
+		Center: geometry.Coordinates{
 			X: data.Center[0],
 			Y: data.Center[1],
 		},
-		StartPoint: Coordinates{
+		StartPoint: geometry.Coordinates{
 			X: math.Cos(data.Angle[1]*math.Pi/180)*data.Radius + data.Center[0],
 			Y: math.Sin(data.Angle[1]*math.Pi/180)*data.Radius + data.Center[1],
 		},
-		EndPoint: Coordinates{
+		EndPoint: geometry.Coordinates{
 			X: math.Cos(data.Angle[0]*math.Pi/180)*data.Radius + data.Center[0],
 			Y: math.Sin(data.Angle[0]*math.Pi/180)*data.Radius + data.Center[1],
 		},
@@ -40,12 +42,12 @@ func NewCurveFromArc(name string, data *entity.Arc) *Curve {
 }
 
 // Start implements the Linker interface.
-func (c Curve) Start() *Coordinates {
+func (c Curve) Start() *geometry.Coordinates {
 	return &c.StartPoint
 }
 
 // End implements the Linker interface.
-func (c Curve) End() *Coordinates {
+func (c Curve) End() *geometry.Coordinates {
 	return &c.EndPoint
 }
 
@@ -57,10 +59,13 @@ func (c *Curve) Revert() {
 
 // Weight implements the Linker interface.
 func (c Curve) Weight(other Linker) [2]float64 {
-	return c.EndPoint.Weight(other)
+	return [2]float64{
+		c.EndPoint.Weight(*other.Start()),
+		c.EndPoint.Weight(*other.End()),
+	}
 }
 
-func quarter(center Coordinates, point Coordinates) int {
+func quarter(center geometry.Coordinates, point geometry.Coordinates) int {
 	xSign := math.Signbit(point.X - center.X)
 	ySign := math.Signbit(point.Y - center.Y)
 
@@ -77,7 +82,7 @@ func quarter(center Coordinates, point Coordinates) int {
 }
 
 // Box implements the Linker interface.
-func (c Curve) Box() Box {
+func (c Curve) Box() geometry.Box {
 	currentCurve := c
 
 	if c.Clockwise {
@@ -98,12 +103,12 @@ func (c Curve) Box() Box {
 	minY := math.Min(currentCurve.StartPoint.Y, currentCurve.EndPoint.Y)
 
 	if startQuarter == endQuarter {
-		return Box{
-			Min: Coordinates{
+		return geometry.Box{
+			Min: geometry.Coordinates{
 				X: minX,
 				Y: minY,
 			},
-			Max: Coordinates{
+			Max: geometry.Coordinates{
 				X: maxX,
 				Y: maxY,
 			},
@@ -130,12 +135,12 @@ func (c Curve) Box() Box {
 		minY = currentCurve.Center.Y - currentCurve.Radius
 	}
 
-	return Box{
-		Min: Coordinates{
+	return geometry.Box{
+		Min: geometry.Coordinates{
 			X: minX,
 			Y: minY,
 		},
-		Max: Coordinates{
+		Max: geometry.Coordinates{
 			X: maxX,
 			Y: maxY,
 		},
@@ -143,7 +148,7 @@ func (c Curve) Box() Box {
 }
 
 // MarshallGCode implements the Marshaler interface.
-func (c Curve) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
+func (c Curve) MarshallGCode(state *machine.Path, configs ...gcode.Configurator) ([]byte, error) {
 	options := gcode.Options{}
 	for _, config := range configs {
 		config(&options)

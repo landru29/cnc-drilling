@@ -45,7 +45,7 @@ func (b Box) String() string {
 }
 
 func (a *Box) Set(value string) error {
-	cleanedValue := strings.ReplaceAll(value, " ", "")
+	cleanedValue := strings.TrimSpace(strings.ReplaceAll(value, " ", ""))
 
 	re := regexp.MustCompile(`\[\(([+-]?\d*(\.\d+)?),([+-]?\d*(\.\d+)?)\),\(([+-]?\d*(\.\d+)?),([+-]?\d*(\.\d+)?)\)\]`)
 	if !re.MatchString(cleanedValue) {

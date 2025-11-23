@@ -7,6 +7,8 @@ import (
 	"github.com/landru29/cnc-drilling/internal/configuration"
 	"github.com/landru29/cnc-drilling/internal/gcode"
 	"github.com/landru29/cnc-drilling/internal/geometry"
+	"github.com/landru29/cnc-drilling/internal/machine"
+	"github.com/landru29/cnc-drilling/internal/shape"
 	"github.com/yofu/dxf"
 	"github.com/yofu/dxf/entity"
 )
@@ -30,14 +32,16 @@ func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 		return err
 	}
 
+	state := machine.NewPath(0, 0, 0)
+
 	setOfPoints := []*entity.Point{}
 	var shapeBox *geometry.Box
 
-	for _, geometryElement := range geometry.FilterEntities(drawing.Entities(), config.Layers...) {
+	for _, geometryElement := range shape.FilterEntities(drawing.Entities(), config.Layers...) {
 		if point, ok := geometryElement.(*entity.Point); ok {
 			setOfPoints = append(setOfPoints, point)
 
-			data := geometry.NewLinker("", geometryElement)
+			data := shape.NewLinker("", geometryElement)
 			if data == nil {
 				continue
 			}
@@ -59,9 +63,10 @@ func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 
 	for deepIndex, deep := range tryDeeps {
 
-		for idx, point := range geometry.PointsFromDXFPoints(geometry.WithDXFPoints(setOfPoints...)) {
+		for idx, point := range shape.PointsFromDXFPoints(shape.WithDXFPoints(setOfPoints...)) {
 
 			code, err := gcode.Marshal(
+				state,
 				point,
 				gcode.WithDeep(deep),
 				gcode.WithFeed(config.Feed),
@@ -85,7 +90,7 @@ func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 		}
 	}
 
-	if _, err := fmt.Fprintf(out, "%s\n", config.AfterScript); err != nil {
+	if _, err := fmt.Fprintf(out, "%s\n%s\n", config.AfterScript, state.String()); err != nil {
 		return err
 	}
 

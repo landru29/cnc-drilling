@@ -1,26 +1,28 @@
-package geometry
+package shape
 
 import (
 	"fmt"
 	"math"
 
 	"github.com/landru29/cnc-drilling/internal/gcode"
+	"github.com/landru29/cnc-drilling/internal/geometry"
+	"github.com/landru29/cnc-drilling/internal/machine"
 	"github.com/yofu/dxf/entity"
 )
 
 // Segment is a line between 2 points.
 type Segment struct {
 	Name       string
-	StartPoint Coordinates
-	EndPoint   Coordinates
+	StartPoint geometry.Coordinates
+	EndPoint   geometry.Coordinates
 }
 
 // NewSgmentFromPoints is a builder.
 func NewSgmentFromPoints(name string, from *entity.Point, to *entity.Point) *Segment {
 	return &Segment{
 		Name:       name,
-		StartPoint: NewCoordinatesFromPoint(from),
-		EndPoint:   NewCoordinatesFromPoint(to),
+		StartPoint: geometry.NewCoordinatesFromPoint(from),
+		EndPoint:   geometry.NewCoordinatesFromPoint(to),
 	}
 }
 
@@ -28,11 +30,11 @@ func NewSgmentFromPoints(name string, from *entity.Point, to *entity.Point) *Seg
 func NewSgmentFromLine(name string, data *entity.Line) *Segment {
 	return &Segment{
 		Name: name,
-		StartPoint: Coordinates{
+		StartPoint: geometry.Coordinates{
 			X: data.Start[0],
 			Y: data.Start[1],
 		},
-		EndPoint: Coordinates{
+		EndPoint: geometry.Coordinates{
 			X: data.End[0],
 			Y: data.End[1],
 		},
@@ -40,12 +42,12 @@ func NewSgmentFromLine(name string, data *entity.Line) *Segment {
 }
 
 // Start implements the Linker interface.
-func (s Segment) Start() *Coordinates {
+func (s Segment) Start() *geometry.Coordinates {
 	return &s.StartPoint
 }
 
 // End implements the Linker interface.
-func (s Segment) End() *Coordinates {
+func (s Segment) End() *geometry.Coordinates {
 	return &s.EndPoint
 }
 
@@ -56,17 +58,20 @@ func (s *Segment) Revert() {
 
 // Weight implements the Linker interface.
 func (s Segment) Weight(other Linker) [2]float64 {
-	return s.EndPoint.Weight(other)
+	return [2]float64{
+		s.EndPoint.Weight(*other.Start()),
+		s.EndPoint.Weight(*other.End()),
+	}
 }
 
 // Box implements the Linker interface.
-func (s Segment) Box() Box {
-	return Box{
-		Min: Coordinates{
+func (s Segment) Box() geometry.Box {
+	return geometry.Box{
+		Min: geometry.Coordinates{
 			X: math.Min(s.StartPoint.X, s.EndPoint.X),
 			Y: math.Min(s.StartPoint.Y, s.EndPoint.Y),
 		},
-		Max: Coordinates{
+		Max: geometry.Coordinates{
 			X: math.Max(s.StartPoint.X, s.EndPoint.X),
 			Y: math.Max(s.StartPoint.Y, s.EndPoint.Y),
 		},
@@ -74,7 +79,7 @@ func (s Segment) Box() Box {
 }
 
 // MarshallGCode implements the Marshaler interface.
-func (s Segment) MarshallGCode(configs ...gcode.Configurator) ([]byte, error) {
+func (s Segment) MarshallGCode(state *machine.Path, configs ...gcode.Configurator) ([]byte, error) {
 	options := gcode.Options{}
 	for _, config := range configs {
 		config(&options)

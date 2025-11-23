@@ -6,6 +6,7 @@ import (
 
 	"github.com/landru29/cnc-drilling/internal/configuration"
 	"github.com/landru29/cnc-drilling/internal/geometry"
+	"github.com/landru29/cnc-drilling/internal/shape"
 	"github.com/yofu/dxf"
 	"github.com/yofu/dxf/entity"
 )
@@ -58,7 +59,7 @@ func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 			entityCounter counters
 		)
 
-		for idx, dxfEntity := range geometry.FilterEntities(drawing.Entities(), layer) {
+		for idx, dxfEntity := range shape.FilterEntities(drawing.Entities(), layer) {
 			switch dxfEntity.(type) {
 			case *entity.Point:
 				entityCounter.points++
@@ -76,7 +77,7 @@ func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 				entityCounter.lightpolylines++
 			}
 
-			data := geometry.NewLinker(fmt.Sprintf("#%d", idx), dxfEntity)
+			data := shape.NewLinker(fmt.Sprintf("#%d", idx), dxfEntity)
 			if data == nil {
 				continue
 			}

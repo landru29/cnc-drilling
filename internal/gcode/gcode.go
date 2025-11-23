@@ -3,11 +3,39 @@ package gcode
 import (
 	"fmt"
 	"reflect"
+	"time"
+
+	"github.com/landru29/cnc-drilling/internal/machine"
 )
+
+// Summary is an operation summary.
+type Summary struct {
+	TotalDistance float64
+	TotalDuration time.Duration
+}
+
+// String implements the Stringer interface.
+func (s Summary) String() string {
+	return fmt.Sprintf(
+		";Total distance: %.01f mm\n;Total time: %s",
+		s.TotalDistance,
+		s.TotalDuration.Round(time.Second).String(),
+	)
+}
+
+// Add adds two summaries.
+func (s Summary) Add(others ...Summary) Summary {
+	for _, other := range others {
+		s.TotalDistance += other.TotalDistance
+		s.TotalDuration += other.TotalDuration
+	}
+
+	return s
+}
 
 // Marshaler is the gcode marshaler.
 type Marshaler interface {
-	MarshallGCode(configs ...Configurator) ([]byte, error)
+	MarshallGCode(state *machine.Path, configs ...Configurator) ([]byte, error)
 }
 
 // Configurator is the marshaler configuration.
@@ -66,9 +94,9 @@ func WithOffset(offset []float64) Configurator {
 
 // Marshal converts any data to gcode.
 // data must implements the Marshaler interface.
-func Marshal(data any, configs ...Configurator) ([]byte, error) {
+func Marshal(state *machine.Path, data any, configs ...Configurator) ([]byte, error) {
 	if marshaler, ok := data.(Marshaler); ok {
-		return marshaler.MarshallGCode(configs...)
+		return marshaler.MarshallGCode(state, configs...)
 	}
 
 	return nil, fmt.Errorf("%s does not implement gcode.Marchaler", reflect.TypeOf(data).Name())

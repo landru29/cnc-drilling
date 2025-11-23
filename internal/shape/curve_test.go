@@ -1,15 +1,16 @@
-package geometry_test
+package shape_test
 
 import (
 	"testing"
 
 	"github.com/landru29/cnc-drilling/internal/geometry"
+	"github.com/landru29/cnc-drilling/internal/shape"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCurveBox(t *testing.T) {
 	t.Run("first quarter", func(t *testing.T) {
-		curve := geometry.Curve{
+		curve := shape.Curve{
 			StartPoint: geometry.Coordinates{
 				X: 20,
 				Y: 30,
@@ -42,7 +43,7 @@ func TestCurveBox(t *testing.T) {
 	})
 
 	t.Run("2 first quarters", func(t *testing.T) {
-		curve := geometry.Curve{
+		curve := shape.Curve{
 			StartPoint: geometry.Coordinates{
 				X: 20,
 				Y: 30,
@@ -75,7 +76,7 @@ func TestCurveBox(t *testing.T) {
 	})
 
 	t.Run("3 first quarters", func(t *testing.T) {
-		curve := geometry.Curve{
+		curve := shape.Curve{
 			StartPoint: geometry.Coordinates{
 				X: 20,
 				Y: 30,
@@ -108,7 +109,7 @@ func TestCurveBox(t *testing.T) {
 	})
 
 	t.Run("4 first quarters", func(t *testing.T) {
-		curve := geometry.Curve{
+		curve := shape.Curve{
 			StartPoint: geometry.Coordinates{
 				X: 20,
 				Y: 30,

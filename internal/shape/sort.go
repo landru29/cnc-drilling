@@ -1,8 +1,10 @@
-package geometry
+package shape
 
 import (
 	"math"
 	"sort"
+
+	"github.com/landru29/cnc-drilling/internal/geometry"
 )
 
 // LinkerSort is a sorter to minimize the distance.
@@ -56,10 +58,10 @@ func nextEntity(entities []Linker, from Linker, filter func(from Linker, to Link
 }
 
 // SortEntities sorts a set of linkers.
-func SortEntities(entities []Linker, from *Coordinates, filter func(from Linker, to Linker) bool) ([]Linker, []Linker) {
+func SortEntities(entities []Linker, from *geometry.Coordinates, filter func(from Linker, to Linker) bool) ([]Linker, []Linker) {
 	var (
-		end    *Coordinates
-		start  *Coordinates
+		end    *Point
+		start  *Point
 		output []Linker
 
 		current Linker
@@ -70,13 +72,13 @@ func SortEntities(entities []Linker, from *Coordinates, filter func(from Linker,
 	copy(linkers, entities)
 
 	if from != nil {
-		end = from
-		start = from
-		current = from
+		end = &Point{Coordinates: *from}
+		start = &Point{Coordinates: *from}
+		current = Point{Coordinates: *from}
 	} else {
 		current = linkers[0]
-		end = current.End()
-		start = current.Start()
+		end = &Point{Coordinates: *current.End()}
+		start = &Point{Coordinates: *current.Start()}
 		output = append(output, current)
 		linkers = linkers[1:]
 	}
@@ -130,8 +132,8 @@ func SortEntities(entities []Linker, from *Coordinates, filter func(from Linker,
 			linkers = linkersAfter
 		}
 
-		end = output[len(output)-1].End()
-		start = output[0].Start()
+		end = &Point{Coordinates: *output[len(output)-1].End()}
+		start = &Point{Coordinates: *output[0].Start()}
 	}
 
 	return output, linkers

@@ -1,7 +1,9 @@
-package geometry
+package shape
 
 import (
 	"fmt"
+
+	"github.com/landru29/cnc-drilling/internal/geometry"
 )
 
 // PathsFromDXF builds a set of paths.
@@ -17,11 +19,11 @@ func PathsFromDXF(entities ...dxfConfigurator) []Path {
 	for _, dxfLine := range dxfFile.lines {
 		output = append(output, &Segment{
 			Name: fmt.Sprintf("#%d / Layer %s", len(output), dxfLine.Layer().Name()),
-			StartPoint: Coordinates{
+			StartPoint: geometry.Coordinates{
 				X: dxfLine.Start[0],
 				Y: dxfLine.Start[1],
 			},
-			EndPoint: Coordinates{
+			EndPoint: geometry.Coordinates{
 				X: dxfLine.End[0],
 				Y: dxfLine.End[1],
 			},
@@ -62,11 +64,11 @@ func PointsFromDXFPoints(configs ...dxfConfigurator) []Point {
 	for idx, dxfPoint := range dxfFile.points {
 		inputPoints[idx] = Point{
 			Name:        fmt.Sprintf("#%d / Layer %s", idx, dxfPoint.Layer().Name()),
-			Coordinates: NewCoordinatesFromPoint(dxfPoint),
+			Coordinates: geometry.NewCoordinatesFromPoint(dxfPoint),
 		}
 	}
 
-	points, _ := SortEntities(inputPoints, &Coordinates{X: 0, Y: 0}, func(from, to Linker) bool {
+	points, _ := SortEntities(inputPoints, &geometry.Coordinates{X: 0, Y: 0}, func(from, to Linker) bool {
 		return true
 	})
 
