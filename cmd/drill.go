@@ -47,8 +47,8 @@ func drillCommand(files *[]string, config *configuration.Config) *cobra.Command 
 		},
 	}
 
-	output.Flags().Float64VarP(&config.Deepness, "deep", "d", config.Deepness, "drilling deep in millimeters")
-	output.Flags().Float64VarP(&config.DeepPerTry, "deep-per-try", "", config.DeepPerTry, "max deep in millimeters during one try")
+	output.Flags().Float64VarP(&config.DeepZ, "deep-z", "d", config.DeepZ, "drilling deep in millimeters")
+	output.Flags().Float64VarP(&config.DeepZPerTry, "deep-z-per-try", "", config.DeepZPerTry, "max deep in millimeters during one try")
 	output.Flags().VarP(&config.Origin, "origin", "o", "shift origin")
 
 	return output

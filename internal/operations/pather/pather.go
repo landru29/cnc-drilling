@@ -80,7 +80,7 @@ func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 		shapeBox = &currentBox
 	}
 
-	tryDeeps := config.TryDeeps()
+	tryDeeps := config.TryDeepsZ()
 
 	for deepIndex, deep := range tryDeeps {
 

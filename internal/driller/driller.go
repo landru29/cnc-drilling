@@ -59,7 +59,7 @@ func Process(in io.Reader, out io.Writer, config configuration.Config) error {
 		}
 	}
 
-	tryDeeps := config.TryDeeps()
+	tryDeeps := config.TryDeepsZ()
 
 	for deepIndex, deep := range tryDeeps {
 

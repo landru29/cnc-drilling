@@ -11,7 +11,7 @@ import (
 )
 
 // Process is the surfacing process.
-func Process(box geometry.Box, step float64, out io.Writer, info io.Writer, config configuration.Config, method Method) error {
+func Process(box geometry.Box, out io.Writer, info io.Writer, config configuration.Config, method Method) error {
 	if _, err := fmt.Fprintf(out, "G90\nG21\nG0 Z%.01f\n", config.SecurityZ); err != nil {
 		return err
 	}
@@ -20,7 +20,7 @@ func Process(box geometry.Box, step float64, out io.Writer, info io.Writer, conf
 		return err
 	}
 
-	tryDeeps := config.TryDeeps()
+	tryDeeps := config.TryDeepsZ()
 
 	var (
 		distance float64       = 0
@@ -39,23 +39,23 @@ func Process(box geometry.Box, step float64, out io.Writer, info io.Writer, conf
 
 		switch method {
 		case MethodZigzag:
-			if err := surfaceAreaZigzag(box, step, out, config, deep, &distance, &duration); err != nil {
+			if err := surfaceAreaZigzag(box, out, config, deep, &distance, &duration); err != nil {
 				return err
 			}
 		case MethodSpiral:
-			if err := surfaceAreaSpiral(box, step, out, config, deep, true, &distance, &duration); err != nil {
+			if err := surfaceAreaSpiral(box, out, config, deep, true, &distance, &duration); err != nil {
 				return err
 			}
 		case MethodSpiralInverted:
-			if err := surfaceAreaSpiral(box, step, out, config, deep, false, &distance, &duration); err != nil {
+			if err := surfaceAreaSpiral(box, out, config, deep, false, &distance, &duration); err != nil {
 				return err
 			}
 		case MethodSpiralFromCenter:
-			if err := surfaceAreaSpiralFromCenter(box, step, out, config, deep, true, &distance, &duration); err != nil {
+			if err := surfaceAreaSpiralFromCenter(box, out, config, deep, true, &distance, &duration); err != nil {
 				return err
 			}
 		case MethodSpiralFromCenterInverted:
-			if err := surfaceAreaSpiralFromCenter(box, step, out, config, deep, false, &distance, &duration); err != nil {
+			if err := surfaceAreaSpiralFromCenter(box, out, config, deep, false, &distance, &duration); err != nil {
 				return err
 			}
 		}
@@ -78,7 +78,6 @@ func Process(box geometry.Box, step float64, out io.Writer, info io.Writer, conf
 
 func surfaceAreaZigzag(
 	box geometry.Box,
-	step float64,
 	out io.Writer,
 	config configuration.Config,
 	deep float64,
@@ -100,7 +99,7 @@ func surfaceAreaZigzag(
 	}
 
 	positiveX := true
-	for y := box.Min.Y; y <= box.Max.Y; y += step {
+	for y := box.Min.Y; y <= box.Max.Y; y += config.DeepXYPerTry {
 		if err := path.MoveToXY(path.CurrentPosition.X, y, config.Feed, out); err != nil {
 			return err
 		}
@@ -126,7 +125,6 @@ func surfaceAreaZigzag(
 
 func surfaceAreaSpiral(
 	box geometry.Box,
-	step float64,
 	out io.Writer,
 	config configuration.Config,
 	deep float64,
@@ -159,20 +157,20 @@ func surfaceAreaSpiral(
 			if err := path.MoveToXY(maxX, minY, config.Feed, out); err != nil {
 				return err
 			}
-			minY += step
+			minY += config.DeepXYPerTry
 
 			// Move down
 			if err := path.MoveToXY(maxX, maxY, config.Feed, out); err != nil {
 				return err
 			}
-			maxX -= step
+			maxX -= config.DeepXYPerTry
 
 			// Move left
 			if minY < maxY {
 				if err := path.MoveToXY(minX, maxY, config.Feed, out); err != nil {
 					return err
 				}
-				maxY -= step
+				maxY -= config.DeepXYPerTry
 			}
 
 			// Move up
@@ -180,27 +178,27 @@ func surfaceAreaSpiral(
 				if err := path.MoveToXY(minX, minY, config.Feed, out); err != nil {
 					return err
 				}
-				minX += step
+				minX += config.DeepXYPerTry
 			}
 		} else {
 			// Move left
 			if err := path.MoveToXY(minX, minY, config.Feed, out); err != nil {
 				return err
 			}
-			minY += step
+			minY += config.DeepXYPerTry
 
 			// Move down
 			if err := path.MoveToXY(minX, maxY, config.Feed, out); err != nil {
 				return err
 			}
-			maxX -= step
+			maxX -= config.DeepXYPerTry
 
 			// Move right
 			if minY < maxY {
 				if err := path.MoveToXY(maxX, maxY, config.Feed, out); err != nil {
 					return err
 				}
-				maxY -= step
+				maxY -= config.DeepXYPerTry
 			}
 
 			// Move up
@@ -208,7 +206,7 @@ func surfaceAreaSpiral(
 				if err := path.MoveToXY(maxX, minY, config.Feed, out); err != nil {
 					return err
 				}
-				minX += step
+				minX += config.DeepXYPerTry
 			}
 		}
 	}
@@ -221,7 +219,6 @@ func surfaceAreaSpiral(
 
 func surfaceAreaSpiralFromCenter(
 	box geometry.Box,
-	step float64,
 	out io.Writer,
 	config configuration.Config,
 	deep float64,
@@ -241,13 +238,13 @@ func surfaceAreaSpiralFromCenter(
 	diff := box.Width() - box.Height()
 	if diff > 0 {
 		schema = geometry.Box{
-			Min: geometry.Coordinates{X: (box.Min.X+box.Max.X)/2 - diff/2, Y: (box.Min.Y + box.Max.Y - step) / 2},
-			Max: geometry.Coordinates{X: (box.Min.X+box.Max.X)/2 + diff/2, Y: (box.Min.Y + box.Max.Y*+step) / 2},
+			Min: geometry.Coordinates{X: (box.Min.X+box.Max.X)/2 - diff/2, Y: (box.Min.Y + box.Max.Y - config.DeepXYPerTry) / 2},
+			Max: geometry.Coordinates{X: (box.Min.X+box.Max.X)/2 + diff/2, Y: (box.Min.Y + box.Max.Y*+config.DeepXYPerTry) / 2},
 		}
 	} else {
 		schema = geometry.Box{
-			Min: geometry.Coordinates{X: (box.Min.X + box.Max.X - step) / 2, Y: (box.Min.Y+box.Max.Y)/2 + diff/2},
-			Max: geometry.Coordinates{X: (box.Min.X + box.Max.X + step) / 2, Y: (box.Min.Y+box.Max.Y)/2 - diff/2},
+			Min: geometry.Coordinates{X: (box.Min.X + box.Max.X - config.DeepXYPerTry) / 2, Y: (box.Min.Y+box.Max.Y)/2 + diff/2},
+			Max: geometry.Coordinates{X: (box.Min.X + box.Max.X + config.DeepXYPerTry) / 2, Y: (box.Min.Y+box.Max.Y)/2 - diff/2},
 		}
 	}
 
@@ -269,10 +266,10 @@ func surfaceAreaSpiralFromCenter(
 			break
 		}
 
-		schema.Min.X -= step
-		schema.Min.Y -= step
-		schema.Max.X += step
-		schema.Max.Y += step
+		schema.Min.X -= config.DeepXYPerTry
+		schema.Min.Y -= config.DeepXYPerTry
+		schema.Max.X += config.DeepXYPerTry
+		schema.Max.Y += config.DeepXYPerTry
 
 		if schema.Min.X < box.Min.X {
 			schema.Min.X = box.Min.X

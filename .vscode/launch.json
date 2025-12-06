@@ -38,7 +38,7 @@
             "args": [
                 "drill",
                 "-d", "10.0",
-                "--deep-per-try", "3",
+                "--deep-z-per-try", "3",
                 // "-f", "320",
                 "-o", "@100,100",
                 "../testdata/point01.dxf"
@@ -53,7 +53,7 @@
             "args": [
                 "path",
                 "-d", "10.0",
-                "--deep-per-try", "3",
+                "--deep-z-per-try", "3",
                 "-o", "@-10,-10",
                 "--layer", "decoupe1",
                 "../testdata/baloon.dxf"
@@ -68,7 +68,7 @@
             "args": [
                 "path",
                 "-d", "10.0",
-                "--deep-per-try", "3",
+                "--deep-z-per-try", "3",
                 "../testdata/rectangle.dxf"
             ]
         },
@@ -81,7 +81,7 @@
             "args": [
                 "path",
                 "-d", "10.0",
-                "--deep-per-try", "5",
+                "--deep-z-per-try", "5",
                 "../testdata/point01.dxf"
             ]
         },
@@ -107,7 +107,6 @@
                 "../testdata/arc.dxf"
             ]
         },
-
         {
             "name": "Surface",
             "type": "go",
@@ -119,10 +118,24 @@
                 "-a", "[(0,0),(155, 25)]",
                 "-d", "1.0",
                 "-s", "2",
-                "--deep-per-try", "1",
+                "--deep-z-per-try", "1",
                 "-m", "spiral-from-center",
                 "-f", "300"
             ]
         },
+        {
+            "name": "CutOut",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd",
+            "args": [
+                "cutout",
+                "-b", "[(0,0),(155, 25)]",
+                "-d", "3.0",
+                "-s", "0.5",
+                "-f", "1000"
+            ]
+        }
     ]
 }
