@@ -136,6 +136,37 @@
                 "-s", "0.5",
                 "-f", "1000"
             ]
+        },
+        {
+            "name": "Box",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd",
+            "args": [
+                "box",
+                "--method", "spiral-from-center",
+                "-b", "[(0,0),(150, 100)]",
+                "-s", "2",
+                "-d", "3.0",
+                "-e", "10",
+                "-f", "300",
+                "--deep-z-per-try", "1",
+            ]
+        },
+        {
+            "name": "Edge",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd",
+            "args": [
+                "edge",
+                "-b", "[(0,0),(150, 100)]",
+                "-d", "10.0",
+                "-f", "300",
+                "--deep-z-per-try", "1",
+            ]
         }
     ]
 }

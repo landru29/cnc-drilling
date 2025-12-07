@@ -75,6 +75,8 @@ func mainCommand() (*cobra.Command, error) {
 		configFileCommand(&config),
 		surfaceCommand(&config),
 		cutOutCommand(&config),
+		boxCommand(&config),
+		edgeCommand(&config),
 	)
 
 	return output, nil
