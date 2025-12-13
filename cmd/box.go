@@ -19,6 +19,8 @@ func boxCommand(config *configuration.Config) *cobra.Command {
 		Use:   "box",
 		Short: "Generate gcode to machine a box",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			surface.Offset(config.Origin.Value)
+
 			return boxer.Process(surface, cmd.OutOrStdout(), cmd.OutOrStderr(), *config, method, edgeDeepZ)
 		},
 	}

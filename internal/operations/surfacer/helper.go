@@ -4,7 +4,7 @@ import (
 	"github.com/landru29/cnc-drilling/internal/geometry"
 )
 
-func translateTo(currentPosition *geometry.Coordinates, targetPosition geometry.Coordinates) float64 {
+func translateTo(currentPosition *geometry.CoordinatesXY, targetPosition geometry.CoordinatesXY) float64 {
 	moveDistance := currentPosition.DistanceTo(targetPosition)
 
 	currentPosition.X = targetPosition.X

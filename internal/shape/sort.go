@@ -58,7 +58,7 @@ func nextEntity(entities []Linker, from Linker, filter func(from Linker, to Link
 }
 
 // SortEntities sorts a set of linkers.
-func SortEntities(entities []Linker, from *geometry.Coordinates, filter func(from Linker, to Linker) bool) ([]Linker, []Linker) {
+func SortEntities(entities []Linker, from *geometry.CoordinatesXY, filter func(from Linker, to Linker) bool) ([]Linker, []Linker) {
 	var (
 		end    *Point
 		start  *Point
@@ -72,13 +72,13 @@ func SortEntities(entities []Linker, from *geometry.Coordinates, filter func(fro
 	copy(linkers, entities)
 
 	if from != nil {
-		end = &Point{Coordinates: *from}
-		start = &Point{Coordinates: *from}
-		current = Point{Coordinates: *from}
+		end = &Point{CoordinatesXY: *from}
+		start = &Point{CoordinatesXY: *from}
+		current = Point{CoordinatesXY: *from}
 	} else {
 		current = linkers[0]
-		end = &Point{Coordinates: *current.End()}
-		start = &Point{Coordinates: *current.Start()}
+		end = &Point{CoordinatesXY: *current.End()}
+		start = &Point{CoordinatesXY: *current.Start()}
 		output = append(output, current)
 		linkers = linkers[1:]
 	}
@@ -132,8 +132,8 @@ func SortEntities(entities []Linker, from *geometry.Coordinates, filter func(fro
 			linkers = linkersAfter
 		}
 
-		end = &Point{Coordinates: *output[len(output)-1].End()}
-		start = &Point{Coordinates: *output[0].Start()}
+		end = &Point{CoordinatesXY: *output[len(output)-1].End()}
+		start = &Point{CoordinatesXY: *output[0].Start()}
 	}
 
 	return output, linkers

@@ -17,6 +17,8 @@ func edgeCommand(config *configuration.Config) *cobra.Command {
 		Use:   "edge",
 		Short: "Generate gcode to machine the edge of a box",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			surface.Offset(config.Origin.Value)
+
 			return edger.Process(surface, cmd.OutOrStdout(), cmd.OutOrStderr(), *config, !counterclockwise)
 		},
 	}

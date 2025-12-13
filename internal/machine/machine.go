@@ -11,7 +11,7 @@ import (
 
 // Path is a gcode path.
 type Path struct {
-	CurrentPosition geometry.Coordinates
+	CurrentPosition geometry.CoordinatesXY
 	CurrentZ        float64
 	Distance        float64
 	Duration        time.Duration
@@ -20,7 +20,7 @@ type Path struct {
 // NewPath is a builder.
 func NewPath(x float64, y float64, z float64) *Path {
 	return &Path{
-		CurrentPosition: geometry.Coordinates{X: x, Y: y},
+		CurrentPosition: geometry.CoordinatesXY{X: x, Y: y},
 		CurrentZ:        z,
 		Distance:        0,
 	}

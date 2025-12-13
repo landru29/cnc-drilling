@@ -19,11 +19,11 @@ func PathsFromDXF(entities ...dxfConfigurator) []Path {
 	for _, dxfLine := range dxfFile.lines {
 		output = append(output, &Segment{
 			Name: fmt.Sprintf("#%d / Layer %s", len(output), dxfLine.Layer().Name()),
-			StartPoint: geometry.Coordinates{
+			StartPoint: geometry.CoordinatesXY{
 				X: dxfLine.Start[0],
 				Y: dxfLine.Start[1],
 			},
-			EndPoint: geometry.Coordinates{
+			EndPoint: geometry.CoordinatesXY{
 				X: dxfLine.End[0],
 				Y: dxfLine.End[1],
 			},
@@ -63,12 +63,12 @@ func PointsFromDXFPoints(configs ...dxfConfigurator) []Point {
 
 	for idx, dxfPoint := range dxfFile.points {
 		inputPoints[idx] = Point{
-			Name:        fmt.Sprintf("#%d / Layer %s", idx, dxfPoint.Layer().Name()),
-			Coordinates: geometry.NewCoordinatesFromPoint(dxfPoint),
+			Name:          fmt.Sprintf("#%d / Layer %s", idx, dxfPoint.Layer().Name()),
+			CoordinatesXY: geometry.NewCoordinatesFromPoint(dxfPoint),
 		}
 	}
 
-	points, _ := SortEntities(inputPoints, &geometry.Coordinates{X: 0, Y: 0}, func(from, to Linker) bool {
+	points, _ := SortEntities(inputPoints, &geometry.CoordinatesXY{X: 0, Y: 0}, func(from, to Linker) bool {
 		return true
 	})
 

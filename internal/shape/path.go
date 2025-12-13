@@ -17,32 +17,32 @@ func NewPathFromCircle(name string, data *entity.Circle) *Path {
 	return &Path{
 		&Curve{
 			Name: fmt.Sprintf("%s (1/2)", name),
-			Center: geometry.Coordinates{
+			Center: geometry.CoordinatesXY{
 				X: data.Center[0],
 				Y: data.Center[1],
 			},
 			Radius: data.Radius,
-			StartPoint: geometry.Coordinates{
+			StartPoint: geometry.CoordinatesXY{
 				X: data.Center[0] + data.Radius,
 				Y: data.Center[1],
 			},
-			EndPoint: geometry.Coordinates{
+			EndPoint: geometry.CoordinatesXY{
 				X: data.Center[0] - data.Radius,
 				Y: data.Center[1],
 			},
 		},
 		&Curve{
 			Name: fmt.Sprintf("%s (2/2)", name),
-			Center: geometry.Coordinates{
+			Center: geometry.CoordinatesXY{
 				X: data.Center[0],
 				Y: data.Center[1],
 			},
 			Radius: data.Radius,
-			StartPoint: geometry.Coordinates{
+			StartPoint: geometry.CoordinatesXY{
 				X: data.Center[0] - data.Radius,
 				Y: data.Center[1],
 			},
-			EndPoint: geometry.Coordinates{
+			EndPoint: geometry.CoordinatesXY{
 				X: data.Center[0] + data.Radius,
 				Y: data.Center[1],
 			},
@@ -89,7 +89,7 @@ func (p Path) MarshallGCode(state *machine.Path, configs ...gcode.Configurator) 
 }
 
 // Start implements the Linker interface.
-func (p Path) Start() *geometry.Coordinates {
+func (p Path) Start() *geometry.CoordinatesXY {
 	if len(p) == 0 {
 		return nil
 	}
@@ -98,7 +98,7 @@ func (p Path) Start() *geometry.Coordinates {
 }
 
 // End implements the Linker interface.
-func (p Path) End() *geometry.Coordinates {
+func (p Path) End() *geometry.CoordinatesXY {
 	if len(p) == 0 {
 		return nil
 	}

@@ -23,15 +23,14 @@ func (c Config) TryDeepsZ() []float64 {
 	if c.DeepZPerTry <= 0 {
 		return []float64{c.DeepZ}
 	}
+	output := make([]float64, int(math.Ceil((c.DeepZ+c.Origin.Z)/c.DeepZPerTry)))
 
-	output := make([]float64, int(math.Ceil((c.DeepZ)/c.DeepZPerTry)))
+	maxFullTry := int(math.Floor((c.DeepZ + c.Origin.Z) / c.DeepZPerTry))
 
-	maxFullTry := int(math.Floor((c.DeepZ) / c.DeepZPerTry))
-
-	output[len(output)-1] = math.Mod(c.DeepZ, c.DeepZPerTry) + float64(maxFullTry)*c.DeepZPerTry
+	output[len(output)-1] = math.Mod(c.DeepZ+c.Origin.Z, c.DeepZPerTry) + float64(maxFullTry)*c.DeepZPerTry - c.Origin.Z
 
 	for index := range maxFullTry {
-		output[index] = float64(index+1) * c.DeepZPerTry
+		output[index] = float64(index+1)*c.DeepZPerTry - c.Origin.Z
 	}
 
 	return output

@@ -13,8 +13,8 @@ import (
 // Segment is a line between 2 points.
 type Segment struct {
 	Name       string
-	StartPoint geometry.Coordinates
-	EndPoint   geometry.Coordinates
+	StartPoint geometry.CoordinatesXY
+	EndPoint   geometry.CoordinatesXY
 }
 
 // NewSgmentFromPoints is a builder.
@@ -30,11 +30,11 @@ func NewSgmentFromPoints(name string, from *entity.Point, to *entity.Point) *Seg
 func NewSgmentFromLine(name string, data *entity.Line) *Segment {
 	return &Segment{
 		Name: name,
-		StartPoint: geometry.Coordinates{
+		StartPoint: geometry.CoordinatesXY{
 			X: data.Start[0],
 			Y: data.Start[1],
 		},
-		EndPoint: geometry.Coordinates{
+		EndPoint: geometry.CoordinatesXY{
 			X: data.End[0],
 			Y: data.End[1],
 		},
@@ -42,12 +42,12 @@ func NewSgmentFromLine(name string, data *entity.Line) *Segment {
 }
 
 // Start implements the Linker interface.
-func (s Segment) Start() *geometry.Coordinates {
+func (s Segment) Start() *geometry.CoordinatesXY {
 	return &s.StartPoint
 }
 
 // End implements the Linker interface.
-func (s Segment) End() *geometry.Coordinates {
+func (s Segment) End() *geometry.CoordinatesXY {
 	return &s.EndPoint
 }
 
@@ -67,11 +67,11 @@ func (s Segment) Weight(other Linker) [2]float64 {
 // Box implements the Linker interface.
 func (s Segment) Box() geometry.Box {
 	return geometry.Box{
-		Min: geometry.Coordinates{
+		Min: geometry.CoordinatesXY{
 			X: math.Min(s.StartPoint.X, s.EndPoint.X),
 			Y: math.Min(s.StartPoint.Y, s.EndPoint.Y),
 		},
-		Max: geometry.Coordinates{
+		Max: geometry.CoordinatesXY{
 			X: math.Max(s.StartPoint.X, s.EndPoint.X),
 			Y: math.Max(s.StartPoint.Y, s.EndPoint.Y),
 		},

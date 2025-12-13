@@ -16,6 +16,8 @@ func cutOutCommand(config *configuration.Config) *cobra.Command {
 		Use:   "cutout",
 		Short: "Generate gcode to cut out a rectangle",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			box.Offset(config.Origin.Value)
+
 			return outcutter.Process(box, cmd.OutOrStdout(), cmd.OutOrStderr(), *config)
 		},
 	}

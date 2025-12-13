@@ -2,8 +2,10 @@ package configuration
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/landru29/cnc-drilling/internal/geometry"
@@ -12,7 +14,8 @@ import (
 // OriginDetection is the tool origin coordinates. it can be absolute
 // or relative of the cutting box.
 type OriginDetection struct {
-	Value    geometry.Coordinates
+	Value    geometry.CoordinatesXY
+	Z        float64
 	Relative bool
 }
 
@@ -23,8 +26,7 @@ func (o OriginDetection) String() string {
 		prefix = "@"
 	}
 
-	return fmt.Sprintf("%s%.01f, %.01f", prefix, o.Value.X, o.Value.Y)
-
+	return fmt.Sprintf("%s%.01f, %.01f, %.01f", prefix, o.Value.X, o.Value.Y, o.Z)
 }
 
 // Set implements the pflag.Value interface.
@@ -35,7 +37,34 @@ func (o *OriginDetection) Set(data string) error {
 		data = data[1:]
 	}
 
-	return o.Value.Set(data)
+	splitter := strings.Split(data, ",")
+	if len(splitter) < 2 {
+		return errors.New("coordinates must be 0.0,0.0,0.0")
+	}
+
+	xValue, err := strconv.ParseFloat(strings.TrimSpace(splitter[0]), 64)
+	if err != nil {
+		return err
+	}
+
+	yValue, err := strconv.ParseFloat(strings.TrimSpace(splitter[1]), 64)
+	if err != nil {
+		return err
+	}
+
+	if len(splitter) > 2 {
+		zValue, err := strconv.ParseFloat(strings.TrimSpace(splitter[2]), 64)
+		if err != nil {
+			return err
+		}
+
+		o.Z = zValue
+	}
+
+	o.Value.X = xValue
+	o.Value.Y = yValue
+
+	return nil
 }
 
 // Type implements the pflag.Value interface.

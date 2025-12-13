@@ -9,8 +9,8 @@ import (
 
 // Box is the cutting box.
 type Box struct {
-	Min Coordinates
-	Max Coordinates
+	Min CoordinatesXY
+	Max CoordinatesXY
 }
 
 // Merge is the Union of many boxes.
@@ -19,11 +19,11 @@ func (b Box) Merge(others ...Box) Box {
 
 	for _, box := range others {
 		output = Box{
-			Min: Coordinates{
+			Min: CoordinatesXY{
 				X: math.Min(output.Min.X, box.Min.X),
 				Y: math.Min(output.Min.Y, box.Min.Y),
 			},
-			Max: Coordinates{
+			Max: CoordinatesXY{
 				X: math.Max(output.Max.X, box.Max.X),
 				Y: math.Max(output.Max.Y, box.Max.Y),
 			},
@@ -31,6 +31,14 @@ func (b Box) Merge(others ...Box) Box {
 	}
 
 	return output
+}
+
+// Offset moves the box by the given point.
+func (b *Box) Offset(point CoordinatesXY) {
+	b.Min.X += point.X
+	b.Min.Y += point.Y
+	b.Max.X += point.X
+	b.Max.Y += point.Y
 }
 
 // String implements the Stringer interface.
@@ -59,8 +67,8 @@ func (a *Box) Set(value string) error {
 		return err
 	}
 
-	a.Min = Coordinates{X: math.Min(x1, x2), Y: math.Min(y1, y2)}
-	a.Max = Coordinates{X: math.Max(x1, x2), Y: math.Max(y1, y2)}
+	a.Min = CoordinatesXY{X: math.Min(x1, x2), Y: math.Min(y1, y2)}
+	a.Max = CoordinatesXY{X: math.Max(x1, x2), Y: math.Max(y1, y2)}
 	return nil
 }
 

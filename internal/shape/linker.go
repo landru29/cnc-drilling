@@ -7,8 +7,8 @@ import (
 
 // Linker is a geometry glue.
 type Linker interface {
-	Start() *geometry.Coordinates
-	End() *geometry.Coordinates
+	Start() *geometry.CoordinatesXY
+	End() *geometry.CoordinatesXY
 	Revert()
 	Weight(Linker) [2]float64
 	Box() geometry.Box

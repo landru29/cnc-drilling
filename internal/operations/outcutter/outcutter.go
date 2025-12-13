@@ -33,11 +33,11 @@ func Process(box geometry.Box, out io.Writer, info io.Writer, config configurati
 
 	for deepIndex, deep := range tryDeeps {
 		cuttingBox := geometry.Box{
-			Min: geometry.Coordinates{
+			Min: geometry.CoordinatesXY{
 				X: box.Min.X + deep,
 				Y: box.Min.Y + deep,
 			},
-			Max: geometry.Coordinates{
+			Max: geometry.CoordinatesXY{
 				X: box.Max.X - deep,
 				Y: box.Max.Y - deep,
 			},

@@ -12,7 +12,7 @@ import (
 
 // Point is a 2D point.
 type Point struct {
-	geometry.Coordinates
+	geometry.CoordinatesXY
 	Name string
 }
 
@@ -26,16 +26,16 @@ func (p Point) DistanceTo(other Point) float64 {
 // NewPointFromPoint is a builder.
 func NewPointFromPoint(name string, data *entity.Point) *Point {
 	return &Point{
-		Name:        name,
-		Coordinates: geometry.NewCoordinatesFromPoint(data),
+		Name:          name,
+		CoordinatesXY: geometry.NewCoordinatesFromPoint(data),
 	}
 }
 
 // NewPointFromVertex is a builder.
 func NewPointFromVertex(name string, data *entity.Vertex) Point {
 	return Point{
-		Name:        name,
-		Coordinates: geometry.NewCoordinatesFromVertex(data),
+		Name:          name,
+		CoordinatesXY: geometry.NewCoordinatesFromVertex(data),
 	}
 }
 
@@ -61,11 +61,11 @@ func (p Point) Weight(other Linker) [2]float64 {
 	output := [2]float64{0, 0}
 
 	if start := other.Start(); start != nil {
-		output[0] = p.Coordinates.Weight(*start)
+		output[0] = p.CoordinatesXY.Weight(*start)
 	}
 
 	if end := other.End(); end != nil {
-		output[1] = p.Coordinates.Weight(*end)
+		output[1] = p.CoordinatesXY.Weight(*end)
 	}
 
 	return output

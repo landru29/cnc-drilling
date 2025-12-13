@@ -24,7 +24,7 @@ func NewPathFromPolyline(name string, polyline *entity.Polyline) *Path {
 				Name:       fmt.Sprintf("%s #%d / Layer %s", name, idx, polyline.Layer().Name()),
 				StartPoint: geometry.NewCoordinatesFromVertex(currentVertex),
 				EndPoint:   geometry.NewCoordinatesFromVertex(vertex),
-				Center: geometry.Coordinates{
+				Center: geometry.CoordinatesXY{
 					X: center[0],
 					Y: center[1],
 				},
@@ -63,15 +63,15 @@ func NewPathFromLightPolyline(name string, polyline *entity.LwPolyline) *Path {
 		if center != nil && ray != 0 {
 			output[idx] = &Curve{
 				Name: fmt.Sprintf("%s #%d / Layer %s", name, idx, polyline.Layer().Name()),
-				StartPoint: geometry.Coordinates{
+				StartPoint: geometry.CoordinatesXY{
 					X: currentVertex[0],
 					Y: currentVertex[1],
 				},
-				EndPoint: geometry.Coordinates{
+				EndPoint: geometry.CoordinatesXY{
 					X: vertex[0],
 					Y: vertex[1],
 				},
-				Center: geometry.Coordinates{
+				Center: geometry.CoordinatesXY{
 					X: center[0],
 					Y: center[1],
 				},
@@ -86,11 +86,11 @@ func NewPathFromLightPolyline(name string, polyline *entity.LwPolyline) *Path {
 
 		output[idx] = &Segment{
 			Name: fmt.Sprintf("%s #%d", name, idx),
-			StartPoint: geometry.Coordinates{
+			StartPoint: geometry.CoordinatesXY{
 				X: currentVertex[0],
 				Y: currentVertex[1],
 			},
-			EndPoint: geometry.Coordinates{
+			EndPoint: geometry.CoordinatesXY{
 				X: vertex[0],
 				Y: vertex[1],
 			},

@@ -13,9 +13,9 @@ import (
 // Curve is a curved segment.
 type Curve struct {
 	Name       string
-	StartPoint geometry.Coordinates
-	EndPoint   geometry.Coordinates
-	Center     geometry.Coordinates
+	StartPoint geometry.CoordinatesXY
+	EndPoint   geometry.CoordinatesXY
+	Center     geometry.CoordinatesXY
 	Radius     float64
 	Clockwise  bool
 }
@@ -24,15 +24,15 @@ type Curve struct {
 func NewCurveFromArc(name string, data *entity.Arc) *Curve {
 	return &Curve{
 		Name: name,
-		Center: geometry.Coordinates{
+		Center: geometry.CoordinatesXY{
 			X: data.Center[0],
 			Y: data.Center[1],
 		},
-		StartPoint: geometry.Coordinates{
+		StartPoint: geometry.CoordinatesXY{
 			X: math.Cos(data.Angle[1]*math.Pi/180)*data.Radius + data.Center[0],
 			Y: math.Sin(data.Angle[1]*math.Pi/180)*data.Radius + data.Center[1],
 		},
-		EndPoint: geometry.Coordinates{
+		EndPoint: geometry.CoordinatesXY{
 			X: math.Cos(data.Angle[0]*math.Pi/180)*data.Radius + data.Center[0],
 			Y: math.Sin(data.Angle[0]*math.Pi/180)*data.Radius + data.Center[1],
 		},
@@ -42,12 +42,12 @@ func NewCurveFromArc(name string, data *entity.Arc) *Curve {
 }
 
 // Start implements the Linker interface.
-func (c Curve) Start() *geometry.Coordinates {
+func (c Curve) Start() *geometry.CoordinatesXY {
 	return &c.StartPoint
 }
 
 // End implements the Linker interface.
-func (c Curve) End() *geometry.Coordinates {
+func (c Curve) End() *geometry.CoordinatesXY {
 	return &c.EndPoint
 }
 
@@ -65,7 +65,7 @@ func (c Curve) Weight(other Linker) [2]float64 {
 	}
 }
 
-func quarter(center geometry.Coordinates, point geometry.Coordinates) int {
+func quarter(center geometry.CoordinatesXY, point geometry.CoordinatesXY) int {
 	xSign := math.Signbit(point.X - center.X)
 	ySign := math.Signbit(point.Y - center.Y)
 
@@ -104,11 +104,11 @@ func (c Curve) Box() geometry.Box {
 
 	if startQuarter == endQuarter {
 		return geometry.Box{
-			Min: geometry.Coordinates{
+			Min: geometry.CoordinatesXY{
 				X: minX,
 				Y: minY,
 			},
-			Max: geometry.Coordinates{
+			Max: geometry.CoordinatesXY{
 				X: maxX,
 				Y: maxY,
 			},
@@ -136,11 +136,11 @@ func (c Curve) Box() geometry.Box {
 	}
 
 	return geometry.Box{
-		Min: geometry.Coordinates{
+		Min: geometry.CoordinatesXY{
 			X: minX,
 			Y: minY,
 		},
-		Max: geometry.Coordinates{
+		Max: geometry.CoordinatesXY{
 			X: maxX,
 			Y: maxY,
 		},
